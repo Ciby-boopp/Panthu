@@ -1,0 +1,49 @@
+:root{--uva:#5B2EE0;--lima:#E4F55A;--rosa:#FF5FA2;--tinta:#1B1033;--lilas:#F3EFFF;--card:#fff;--texto:#1B1033;--suave:#5E5478;--borda:#DDD3F7;--raio:22px}
+@media (prefers-color-scheme:dark){:root{--lilas:#150C29;--card:#21143D;--texto:#F3EFFF;--suave:#B7A9DB;--borda:#3A2A63;--uva:#8B66FF}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--lilas);color:var(--texto);font-family:var(--f-texto),system-ui,sans-serif;line-height:1.55;padding-bottom:env(safe-area-inset-bottom,0)}
+h1,h2,h3{font-family:var(--f-titulo),Georgia,sans-serif;line-height:1.1;margin:0}
+a{color:var(--uva)}
+main{max-width:760px;margin:0 auto;padding:16px 18px 56px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + env(safe-area-inset-top,0)) 18px 10px;max-width:760px;margin:0 auto;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--texto);font:800 24px var(--f-titulo),sans-serif}
+.marca svg{width:36px;height:36px}
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.nav a{font-weight:600;font-size:14px;text-decoration:none}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:var(--raio);padding:18px;margin:14px 0}
+.evento{padding:0;overflow:hidden}
+.banner{background:var(--uva);color:#fff;padding:20px 18px;position:relative;overflow:hidden}
+.banner img.capa{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
+.banner>*{position:relative}
+.banner h3{font-size:26px;font-weight:800}
+.corpo{padding:16px 18px;display:grid;gap:10px}
+.local{display:flex;align-items:center;gap:12px;margin-top:10px}
+.logo-local{width:56px;height:56px;border-radius:16px;background:#fff;border:2px dashed var(--borda);display:grid;place-items:center;font-size:11px;color:var(--suave);text-align:center;flex:none;overflow:hidden}
+.logo-local img{width:100%;height:100%;object-fit:contain;border:0}
+.btn{display:inline-block;border:0;border-radius:999px;padding:12px 22px;font:600 15px var(--f-texto),sans-serif;cursor:pointer;min-height:44px;text-decoration:none;text-align:center}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--rosa);outline-offset:2px}
+.p{background:var(--uva);color:#fff}.s{background:var(--lima);color:var(--tinta)}.o{background:transparent;color:var(--texto);border:2px solid var(--borda)}
+.tag{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600;background:var(--borda);color:var(--texto);margin-right:6px}
+.tag.ok{background:var(--lima);color:var(--tinta)}
+.barra{height:10px;border-radius:99px;background:var(--borda);overflow:hidden}.barra i{display:block;height:100%;background:var(--rosa);border-radius:99px}
+.campo{display:grid;gap:4px;margin:10px 0}
+.campo label{font-weight:600;font-size:14px}
+input{font:inherit;padding:12px 14px;border-radius:14px;border:2px solid var(--borda);background:var(--card);color:var(--texto);width:100%;min-height:44px}
+.msg{border-radius:14px;padding:10px 14px;margin:10px 0;font-size:14px;font-weight:600}
+.msg.erro{background:#FFE1E8;color:#8A1033}.msg.ok{background:var(--lima);color:var(--tinta)}
+.item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--borda)}
+.item small{display:block;color:var(--suave)}
+.pessoas{display:flex;flex-wrap:wrap;gap:8px}
+.pessoa{display:flex;align-items:center;gap:8px;background:var(--lilas);border-radius:999px;padding:4px 12px 4px 4px;font-size:14px;font-weight:600}
+.pessoa i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;color:#fff;background:var(--uva)}
+.pessoa:nth-child(even) i{background:var(--rosa);color:var(--tinta)}
+.vazio{text-align:center;padding:36px 12px;color:var(--suave)}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.num{font:800 38px var(--f-titulo),sans-serif}
+.adm{background:var(--tinta);color:#F3EFFF;border-radius:var(--raio);padding:18px}
+.adm .num{color:var(--lima)}
+.carregando{padding:40px;text-align:center;color:var(--suave)}
+.centro{min-height:100dvh;display:grid;place-items:center;padding:20px}
+.centro .card{width:100%;max-width:420px}
