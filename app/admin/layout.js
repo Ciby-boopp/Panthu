@@ -7,6 +7,7 @@ export default function AdminLayout({ children }) {
       <Link href="/admin">Painel</Link>
       <Link href="/admin/eventos">Eventos</Link>
       <Link href="/admin/estabelecimentos">Estabelecimentos</Link>
+      <Link href="/admin/usuarios">Usuários</Link>
     </nav>
     {children}
   </main></>);
