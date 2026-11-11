@@ -1,14 +1,6 @@
-import Link from 'next/link';
 import Topo from '@/components/Topo';
+import AdminNav from '@/components/admin/AdminNav';
 import './admin.css';
 export default function AdminLayout({ children }) {
-  return (<><Topo papel="admin" /><main>
-    <nav className="subnav">
-      <Link href="/admin">Painel</Link>
-      <Link href="/admin/eventos">Eventos</Link>
-      <Link href="/admin/estabelecimentos">Estabelecimentos</Link>
-      <Link href="/admin/usuarios">Usuários</Link>
-    </nav>
-    {children}
-  </main></>);
+  return (<><Topo papel="admin" /><main><AdminNav />{children}</main></>);
 }

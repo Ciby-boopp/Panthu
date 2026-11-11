@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
+import { CATEGORIAS } from '@/lib/categorias';
 import { enviarImagem, auditar, paraISO, deISO } from '@/lib/util';
 
 export default function EventoForm({ inicial, locais }) {
@@ -22,6 +23,7 @@ export default function EventoForm({ inicial, locais }) {
         nome: String(f.get('nome')).trim(), descricao: String(f.get('descricao')).trim() || null,
         orientacoes: String(f.get('orientacoes')).trim() || null, inicio,
         capacidade: cap === '' ? null : parseInt(cap, 10),
+        categoria: String(f.get('categoria') || '') || null,
         estabelecimento_id: f.get('estabelecimento') || null, publicado: f.get('publicado') === 'on'
       };
       if (banner) dados.banner_url = banner;
@@ -60,6 +62,8 @@ export default function EventoForm({ inicial, locais }) {
           <option value="">Local a definir</option>
           {locais.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
         </select></div>
+      <div className="campo"><label htmlFor="categoria">Categoria (usada nos filtros de “Perto de você”)</label>
+        <select id="categoria" name="categoria" defaultValue={i.categoria || ''}><option value="">Sem categoria</option>{CATEGORIAS.map(x => <option key={x}>{x}</option>)}</select></div>
       <div className="campo"><label htmlFor="orientacoes">Informações e orientações do encontro</label><textarea id="orientacoes" name="orientacoes" defaultValue={i.orientacoes || ''} /></div>
       <label><input type="checkbox" name="publicado" defaultChecked={i.publicado ?? false} />Publicado (visível para os participantes)</label>
       {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}

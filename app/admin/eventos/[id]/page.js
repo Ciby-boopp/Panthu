@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { criarServidor } from '@/lib/supabase/server';
 import EventoForm from '@/components/admin/EventoForm';
@@ -11,6 +12,7 @@ export default async function Editar({ params }) {
   const { data: lista } = await sb.rpc('lista_presenca', { ev: id });
   return (<>
     <h1 style={{ fontSize: 30 }}>{ev.nome}</h1>
+    <p><Link className="btn s" href={`/host/evento/${id}`}>Presença e mesas</Link></p>
     <EventoForm inicial={ev} locais={locais || []} />
     <div className="card"><h3>Confirmados ({lista?.length || 0})</h3>
       {lista?.length ? <div className="pessoas" style={{ marginTop: 10 }}>{lista.map(p => <div className="pessoa" key={p.usuario_id}><i>{p.inicial}</i>{p.nome}</div>)}</div>

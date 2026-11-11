@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import Logo from '@/components/Logo';
+import SenhaInput from '@/components/SenhaInput';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Entrar() {
   const [modo, setModo] = useState('login');
@@ -37,16 +39,17 @@ export default function Entrar() {
 
   return (
     <div className="centro">
+      <div className="tema-canto"><ThemeToggle /></div>
       <div className="card">
-        <div className="marca" style={{ marginBottom: 8 }}><Logo />panthu</div>
-        <h1 style={{ fontSize: 28 }}>{modo === 'login' ? 'Bora sentar junto?' : modo === 'cadastro' ? 'Criar minha conta' : 'Recuperar senha'}</h1>
+        <Logo completo />
+        {modo !== 'login' && <h1 style={{ fontSize: 28, textAlign: 'center', marginBottom: 6 }}>{modo === 'cadastro' ? 'Criar minha conta' : 'Recuperar senha'}</h1>}
         <form onSubmit={enviar}>
           {modo === 'cadastro' && (<>
             <div className="campo"><label htmlFor="nome">Nome completo</label><input id="nome" name="nome" required minLength={3} autoComplete="name" /></div>
             <div className="campo"><label htmlFor="tel">Telefone</label><input id="tel" name="telefone" type="tel" required autoComplete="tel" /></div>
           </>)}
           <div className="campo"><label htmlFor="email">E-mail</label><input id="email" name="email" type="email" required autoComplete="email" /></div>
-          {modo !== 'recuperar' && <div className="campo"><label htmlFor="senha">Senha</label><input id="senha" name="senha" type="password" required minLength={8} autoComplete={modo === 'login' ? 'current-password' : 'new-password'} /></div>}
+          {modo !== 'recuperar' && <div className="campo"><label htmlFor="senha">Senha</label><SenhaInput id="senha" autoComplete={modo === 'login' ? 'current-password' : 'new-password'} /></div>}
           {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}
           <button className="btn p" style={{ width: '100%' }} disabled={carregando}>
             {carregando ? 'Aguarde…' : modo === 'login' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta' : 'Enviar link'}
