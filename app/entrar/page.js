@@ -4,6 +4,20 @@ import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import Logo from '@/components/Logo';
 import SenhaInput from '@/components/SenhaInput';
+import { senhaForte, SENHA_REGRA } from '@/lib/senha';
+
+// Traduz o erro real do Supabase para uma mensagem que diz o que ajustar (o código técnico vai junto, para facilitar o suporte).
+function motivoCadastro(error) {
+  const c = error.code || '', m = (error.message || '').toLowerCase();
+  let t = 'Não foi possível criar a conta agora.';
+  if (c === 'user_already_exists' || m.includes('already registered')) t = 'Este e-mail já tem cadastro. Toque em “Já tenho conta” para entrar, ou use “Esqueci a senha”.';
+  else if (c === 'weak_password' || m.includes('password')) t = 'A senha foi recusada. Use pelo menos 8 caracteres, misturando letras e números.';
+  else if (c === 'over_email_send_rate_limit' || c === 'over_request_rate_limit' || error.status === 429) t = 'Muitas tentativas em pouco tempo. Aguarde cerca de uma hora e tente de novo.';
+  else if (c === 'email_address_invalid' || (m.includes('invalid') && m.includes('email'))) t = 'O Supabase recusou este e-mail. Confira se está escrito corretamente.';
+  else if (c === 'signup_disabled') t = 'Os cadastros estão desativados no momento.';
+  else if (m.includes('database error')) t = 'O servidor não conseguiu salvar o perfil. Avise o administrador do Panthu.';
+  return `${t} (detalhe: ${c || error.status || error.message})`;
+}
 
 export default function Entrar() {
   const [modo, setModo] = useState('login');
@@ -22,11 +36,12 @@ export default function Entrar() {
       if (error) setMsg({ t: 'erro', m: 'E-mail ou senha incorretos.' });
       else { router.replace('/app'); router.refresh(); return; }
     } else if (modo === 'cadastro') {
+      if (!senhaForte(senha)) { setMsg({ t: 'erro', m: SENHA_REGRA }); setC(false); return; }
       const { data, error } = await sb.auth.signUp({
         email, password: senha,
         options: { data: { nome: String(f.get('nome')).trim(), telefone: String(f.get('telefone')).trim() } }
       });
-      if (error) setMsg({ t: 'erro', m: 'Não foi possível criar a conta. Confira os dados ou tente entrar.' });
+      if (error) setMsg({ t: 'erro', m: motivoCadastro(error) });
       else if (data.session) { router.replace('/app'); router.refresh(); return; }
       else setMsg({ t: 'ok', m: 'Conta criada! Confirme seu e-mail para entrar.' });
     } else {
@@ -47,9 +62,9 @@ export default function Entrar() {
             <div className="campo"><label htmlFor="tel">Telefone</label><input id="tel" name="telefone" type="tel" required autoComplete="tel" /></div>
           </>)}
           <div className="campo"><label htmlFor="email">E-mail</label><input id="email" name="email" type="email" required autoComplete="email" /></div>
-          {modo !== 'recuperar' && <div className="campo"><label htmlFor="senha">Senha</label><SenhaInput id="senha" autoComplete={modo === 'login' ? 'current-password' : 'new-password'} /></div>}
+          {modo !== 'recuperar' && <div className="campo"><label htmlFor="senha">Senha</label><SenhaInput id="senha" forte={modo === 'cadastro'} autoComplete={modo === 'login' ? 'current-password' : 'new-password'} /></div>}
           {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}
-          <button className="btn p" style={{ width: '100%' }} disabled={carregando}>
+          <button className="btn ouro" style={{ width: '100%' }} disabled={carregando}>
             {carregando ? 'Aguarde…' : modo === 'login' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta' : 'Enviar link'}
           </button>
         </form>

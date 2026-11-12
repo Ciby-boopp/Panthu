@@ -18,7 +18,7 @@ export default async function Admin() {
     </div>
     <div className="card">
       <div className="linha"><Link className="btn p" href="/admin/eventos/novo">+ Novo evento</Link><Link className="btn s" href="/admin/estabelecimentos/novo">+ Novo estabelecimento</Link></div>
-      <p style={{ color: 'var(--suave)' }}>Hosts, mesas, jogos, pontos, cupons, chat, denúncias e financeiro chegam nas próximas entregas.</p>
+      <p style={{ color: 'var(--suave)' }}>Hosts, mesas, chat, denúncias, localização, amigos e avaliações já estão no ar. Jogos, pontos, cupons e financeiro chegam nas próximas entregas.</p>
     </div>
   </>);
 }

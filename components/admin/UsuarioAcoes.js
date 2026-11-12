@@ -20,6 +20,7 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
     ver_participantes: perm?.ver_participantes ?? true, gerenciar_mesas: perm?.gerenciar_mesas ?? true,
     ver_dinamicas: perm?.ver_dinamicas ?? true, registrar_ocorrencias: perm?.registrar_ocorrencias ?? false
   });
+  const [regiao, setRegiao] = useState(perfil.regiao || '');
   const [vinc, setVinc] = useState(new Set(vinculos));
   const ok = (m) => { setMsg({ t: 'ok', m }); router.refresh(); };
   const erro = (m = 'Não foi possível salvar.') => setMsg({ t: 'erro', m });
@@ -30,6 +31,13 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
     if (error) return erro();
     if (papel === 'host') await sb.from('host_permissoes').upsert({ host_id: perfil.id }, { onConflict: 'host_id', ignoreDuplicates: true });
     ok('Papel atualizado.');
+  }
+  async function salvarRegiao() {
+    setMsg(null);
+    const { error } = await sb.from('perfis').update({ regiao: regiao.trim() || null }).eq('id', perfil.id);
+    if (error) return erro('Não foi possível salvar a região. Confira se o SQL de atualização foi executado no Supabase.');
+    await auditar(sb, 'definiu_regiao_host', { host: perfil.id, regiao: regiao.trim() });
+    ok('Região salva.');
   }
   async function mudar(campo, valor, pergunta) {
     if (pergunta && !confirm(pergunta)) return;
@@ -77,6 +85,12 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
       {souEu && <p style={{ color: 'var(--suave)' }}>Você não pode alterar o próprio acesso.</p>}
     </div>
     {perfil.papel === 'host' && (<>
+      <div className="card">
+        <h3>Região de responsabilidade</h3>
+        <p style={{ color: 'var(--suave)' }}>Cidade, bairro ou área que este host coordena. Aparece no painel dele.</p>
+        <div className="campo"><label htmlFor="regiao">Região</label><input id="regiao" value={regiao} maxLength={80} onChange={e => setRegiao(e.target.value)} placeholder="Ex.: Londrina — Zona Sul" /></div>
+        <button className="btn p mini" onClick={salvarRegiao}>Salvar região</button>
+      </div>
       <div className="card">
         <h3>Permissões do Host</h3>
         {PERMS.map(([k, t]) => <p key={k}><label><input type="checkbox" checked={p[k]} onChange={e => setP({ ...p, [k]: e.target.checked })} />{t}</label></p>)}

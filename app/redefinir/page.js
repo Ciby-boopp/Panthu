@@ -4,12 +4,14 @@ import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import SenhaInput from '@/components/SenhaInput';
 import Logo from '@/components/Logo';
+import { senhaForte, SENHA_REGRA } from '@/lib/senha';
 export default function Redefinir() {
   const [msg, setMsg] = useState(null);
   const router = useRouter();
   async function salvar(e) {
     e.preventDefault();
     const senha = new FormData(e.target).get('senha');
+    if (!senhaForte(senha)) return setMsg(SENHA_REGRA);
     const { error } = await criarCliente().auth.updateUser({ password: senha });
     if (error) setMsg('Link expirado ou inválido. Peça um novo em "Esqueci a senha".');
     else { router.replace('/app'); router.refresh(); }
@@ -19,9 +21,9 @@ export default function Redefinir() {
       <Logo completo />
       <h1 style={{ fontSize: 28 }}>Nova senha</h1>
       <form onSubmit={salvar}>
-        <div className="campo"><label htmlFor="s">Nova senha (mín. 8 caracteres)</label><SenhaInput id="s" autoComplete="new-password" /></div>
+        <div className="campo"><label htmlFor="s">Nova senha</label><SenhaInput id="s" forte autoComplete="new-password" /></div>
         {msg && <div className="msg erro">{msg}</div>}
-        <button className="btn p" style={{ width: '100%' }}>Salvar senha</button>
+        <button className="btn ouro" style={{ width: '100%' }}>Salvar senha</button>
       </form>
     </div></div>
   );
