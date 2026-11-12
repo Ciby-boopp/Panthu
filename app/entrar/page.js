@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import Logo from '@/components/Logo';
 import SenhaInput from '@/components/SenhaInput';
-import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Entrar() {
   const [modo, setModo] = useState('login');
@@ -39,7 +38,6 @@ export default function Entrar() {
 
   return (
     <div className="centro">
-      <div className="tema-canto"><ThemeToggle /></div>
       <div className="card">
         <Logo completo />
         {modo !== 'login' && <h1 style={{ fontSize: 28, textAlign: 'center', marginBottom: 6 }}>{modo === 'cadastro' ? 'Criar minha conta' : 'Recuperar senha'}</h1>}

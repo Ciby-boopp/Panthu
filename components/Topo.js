@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import Sair from './Sair';
 import Icone from './Icone';
-import ThemeToggle from './ThemeToggle';
 
 export default function Topo({ papel }) {
   const path = usePathname() || '';
@@ -21,7 +20,7 @@ export default function Topo({ papel }) {
     <header className="topo"><div className="topo-in">
       <Link href="/app" className="marca" aria-label="Panthu, página inicial"><Logo /></Link>
       <nav className="nav" aria-label="Principal">{itens.map(aba)}</nav>
-      <div className="acoes"><ThemeToggle /><span className="nav-sair"><Sair /></span></div>
+      <div className="acoes"><span className="nav-sair"><Sair /></span></div>
     </div></header>
     <nav className="abas-baixo" aria-label="Navegação">{itens.map(aba)}<Sair aba /></nav>
   </>);

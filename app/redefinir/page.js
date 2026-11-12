@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import SenhaInput from '@/components/SenhaInput';
-import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 export default function Redefinir() {
   const [msg, setMsg] = useState(null);
@@ -16,7 +15,7 @@ export default function Redefinir() {
     else { router.replace('/app'); router.refresh(); }
   }
   return (
-    <div className="centro"><div className="tema-canto"><ThemeToggle /></div><div className="card">
+    <div className="centro"><div className="card">
       <Logo completo />
       <h1 style={{ fontSize: 28 }}>Nova senha</h1>
       <form onSubmit={salvar}>
