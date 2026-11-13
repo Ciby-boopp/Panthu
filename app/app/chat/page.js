@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import Sala from '@/components/Sala';
+import PedidosRecebidos from '@/components/PedidosRecebidos';
 import '@/components/chat.css';
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,7 @@ export default async function Chat({ searchParams }) {
   const aba = ABAS.some(a => a[0] === sp?.aba) ? sp.aba : 'comunidade';
   const sb = await criarServidor();
   const { data: { user } } = await sb.auth.getUser();
+  const { data: pedidos } = await sb.rpc('meus_pedidos_recebidos');
   let conteudo;
 
   if (aba === 'comunidade') {
@@ -42,6 +44,7 @@ export default async function Chat({ searchParams }) {
 
   return (<>
     <h1 style={{ fontSize: 32 }}>Chat</h1>
+    <PedidosRecebidos key={(pedidos || []).map(p => p.id).join(',')} lista={pedidos || []} />
     <div className="abas">
       {ABAS.map(([v, t]) => <Link key={v} href={`/app/chat?aba=${v}`} className={`btn mini ${aba === v ? 'p' : 'o'}`}>{t}</Link>)}
     </div>

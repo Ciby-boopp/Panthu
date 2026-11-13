@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import PerfilForm from '@/components/PerfilForm';
+import NotificacoesPush from '@/components/NotificacoesPush';
 import { quando } from '@/lib/util';
 import '@/components/chat.css';
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ export default async function Perfil() {
     <p><Link href={`/app/pessoa/${user.id}`}>Ver como os outros me veem</Link></p>
     <p><Link className="btn s mini" href="/app/amigos">Meus amigos</Link></p>
     <PerfilForm perfil={perfil} />
+    <NotificacoesPush />
     <div className="card"><h3>Meu histórico</h3>
       {(!hist || !hist.length) && <p style={{ color: 'var(--suave)' }}>Você ainda não confirmou presença em nenhum encontro.</p>}
       {(hist || []).filter(h => h.eventos).map((h, i) => (

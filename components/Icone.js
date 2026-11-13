@@ -14,6 +14,7 @@ const D = {
   usuarios: <><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5 6.5-5s5.7 1.5 6.5 5"/><path d="M16 4.5a3.5 3.5 0 010 7M18 15c2 .5 3.2 2 3.5 5"/></>,
   local: <><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></>,
   check: <><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></>,
+  jogos: <><rect x="4" y="3" width="12" height="16" rx="2.5"/><path d="M9 21h8a3 3 0 003-3V8"/><path d="M10 8.5l2 2.5-2 2.5-2-2.5z"/></>,
   alerta: <><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.5"/></>,
 };
 export default function Icone({ nome, className = '' }) {

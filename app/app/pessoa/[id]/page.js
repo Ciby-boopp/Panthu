@@ -13,6 +13,8 @@ export default async function Pessoa({ params }) {
   const { data } = await sb.rpc('perfil_pessoa', { p_id: id });
   const p = data?.[0];
   if (!p) notFound();
+  const { data: ep } = p.sou_eu ? { data: null } : await sb.rpc('estado_pedido', { outro: p.id });
+  const e = ep?.[0] || { estado: 'nenhum', sala_id: null, pedido_id: null };
   return (<>
     <p><Link href="/app/chat">← Voltar</Link></p>
     <div className="card" style={{ textAlign: 'center' }}>
@@ -23,9 +25,10 @@ export default async function Pessoa({ params }) {
         ? <Link className="btn p" href="/app/perfil">Editar meu perfil</Link>
         : <div style={{ display: 'grid', gap: 10, justifyItems: 'center' }}>
             <AmigoBotao id={p.id} euId={user.id} inicial={p.eh_amigo} />
-            {p.mesmo_evento
-              ? <div className="pessoa-linha" style={{ justifyContent: 'center', borderBottom: 0 }}><AcoesPessoa id={p.id} /></div>
-              : <p style={{ color: 'var(--suave)', fontSize: 14 }}>Você pode conversar em particular com quem confirmou presença no mesmo evento que você.</p>}
+            <div className="pessoa-linha" style={{ justifyContent: 'center', borderBottom: 0 }}>
+              <AcoesPessoa id={p.id} estado={e.estado} salaId={e.sala_id} pedidoId={e.pedido_id} mesmoEvento={p.mesmo_evento} />
+            </div>
+            {e.estado === 'nenhum' && !p.mesmo_evento && <p style={{ color: 'var(--suave)', fontSize: 14, margin: 0 }}>Para conversar em particular, a pessoa precisa aceitar o seu pedido.</p>}
           </div>}
     </div>
   </>);
