@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
 
 const CHAVE = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -10,7 +10,8 @@ function chaveEmBytes(b64) {
 }
 
 export default function NotificacoesPush() {
-  const [sb] = useState(() => criarCliente());
+  const sbRef = useRef(null);
+  const getSb = useCallback(() => (sbRef.current ||= criarCliente()), []);
   const [estado, setEstado] = useState('carregando'); // carregando | ok | ios | nao | config
   const [ativo, setAtivo] = useState(false);
   const [negado, setNegado] = useState(false);
@@ -29,12 +30,12 @@ export default function NotificacoesPush() {
         const reg = await navigator.serviceWorker.getRegistration('/sw.js');
         const sub = await reg?.pushManager.getSubscription();
         setAtivo(!!sub && Notification.permission === 'granted');
-        const { data } = await sb.from('push_prefs').select('previa, comunidade').maybeSingle();
+        const { data } = await getSb().from('push_prefs').select('previa, comunidade').maybeSingle();
         if (data) setPrefs(data);
       } catch {}
       setEstado('ok');
     })();
-  }, [sb]);
+  }, [getSb]);
 
   async function ativar() {
     setOcupado(true); setMsg(null);
@@ -45,7 +46,7 @@ export default function NotificacoesPush() {
       await navigator.serviceWorker.ready;
       const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveEmBytes(CHAVE) });
       const j = sub.toJSON();
-      const { error } = await sb.rpc('salvar_inscricao_push', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+      const { error } = await getSb().rpc('salvar_inscricao_push', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
       if (error) throw error;
       setAtivo(true);
     } catch { setMsg('Não foi possível ativar agora. Tente de novo.'); }
@@ -56,7 +57,7 @@ export default function NotificacoesPush() {
     try {
       const reg = await navigator.serviceWorker.getRegistration('/sw.js');
       const sub = await reg?.pushManager.getSubscription();
-      if (sub) { await sb.from('push_inscricoes').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
+      if (sub) { await getSb().from('push_inscricoes').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
       setAtivo(false);
     } catch { setMsg('Não foi possível desativar agora.'); }
     finally { setOcupado(false); }
@@ -64,8 +65,8 @@ export default function NotificacoesPush() {
   async function mudar(campo, valor) {
     const novo = { ...prefs, [campo]: valor };
     setPrefs(novo);
-    const { data: { user } } = await sb.auth.getUser();
-    const { error } = await sb.from('push_prefs').upsert({ usuario_id: user.id, ...novo }, { onConflict: 'usuario_id' });
+    const { data: { user } } = await getSb().auth.getUser();
+    const { error } = await getSb().from('push_prefs').upsert({ usuario_id: user.id, ...novo }, { onConflict: 'usuario_id' });
     if (error) { setPrefs(prefs); setMsg('Não foi possível salvar a preferência.'); }
   }
 
