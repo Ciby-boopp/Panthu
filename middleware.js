@@ -23,6 +23,11 @@ export async function middleware(req) {
     if (!p || !p.ativo || p.bloqueado) return ir('/entrar?erro=acesso');
     if (path.startsWith('/admin') && p.papel !== 'admin') return ir('/app');
     if (path.startsWith('/host') && !['host', 'admin'].includes(p.papel)) return ir('/app');
+    // Cadastro inteligente: quem ainda não respondeu as boas-vindas vai para lá. Se a coluna ainda não existe (SQL não rodado), ignora.
+    if (path.startsWith('/app') && path !== '/app/boas-vindas') {
+      const { data: o, error } = await sb.from('perfis').select('onboarding_em').eq('id', user.id).single();
+      if (!error && o && !o.onboarding_em) return ir('/app/boas-vindas');
+    }
   }
   return res;
 }

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
 import { baralho, embaralhar, idCarta } from '@/lib/cartas';
+import MemoriaOnline from './MemoriaOnline';
 
 const NIVEIS = { facil: { pares: 6, cols: 4, nome: 'Fácil' }, medio: { pares: 8, cols: 4, nome: 'Médio' }, dificil: { pares: 10, cols: 5, nome: 'Difícil' } };
 
@@ -10,8 +11,9 @@ function montar(pares) {
   return embaralhar([...faces, ...faces]).map((f, id) => ({ id, f, achada: false }));
 }
 
-export default function Memoria({ modo, aoTerminar }) {
+export default function Memoria({ modo, aoTerminar, auto }) {
   const [nivel, setNivel] = useState(null);
+  if (auto) return <MemoriaOnline sala={auto.sala} seat={auto.seat} aoTerminar={aoTerminar} />;
   if (!nivel) {
     return (
       <div className="j-mesa" style={{ textAlign: 'center' }}>

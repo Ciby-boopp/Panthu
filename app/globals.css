@@ -180,3 +180,23 @@ main:has(.pag-larga){max-width:1440px}
 .subabas a{flex:none;padding:10px 16px;font-weight:600;font-size:15px;text-decoration:none;color:var(--suave);border-bottom:3px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s}
 .subabas a:hover{color:var(--texto)}
 .subabas a[aria-current=page]{color:var(--texto);border-bottom-color:var(--ouro)}
+/* ---------- chips, favoritos, acessibilidade (v3) ---------- */
+.chips-lista{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--borda);background:var(--card);color:var(--texto);border-radius:999px;padding:8px 16px;min-height:40px;font:600 14px var(--f-texto),sans-serif;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--verde)}.chip.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.fav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--borda);background:color-mix(in srgb,var(--card) 85%,transparent);color:var(--suave);display:grid;place-items:center;cursor:pointer;flex:none}
+.fav-btn:hover{border-color:var(--ouro);color:var(--ouro)}
+.pular{position:absolute;left:-999px;top:8px;background:var(--ouro);color:#14211E;padding:10px 16px;border-radius:12px;font-weight:700;z-index:100}
+.pular:focus{left:12px}
+main:focus{outline:0}
+html[data-texto=grande]{font-size:112.5%}html[data-texto=maior]{font-size:125%}
+html[data-contraste=alto]{--fundo:#000;--card:#0B140E;--texto:#fff;--suave:#E6EDE7;--borda:#9DB8A4;--verde:#2F7A3A;--verde-s:#16311D;--verde-t:#D8F5C8;--link:#C6F0A8}
+html[data-contraste=alto] .btn.p{background:#1F6B2B}
+html[data-movimento=reduzido] *,html[data-movimento=reduzido] *::before,html[data-movimento=reduzido] *::after{animation:none!important;transition:none!important}
+.selo-data{position:absolute;top:12px;left:12px;background:var(--fundo);color:var(--texto);border-radius:14px;padding:6px 10px;text-align:center;line-height:1.1;font-weight:700;z-index:2;box-shadow:var(--sombra)}
+.selo-data b{display:block;font-size:20px;font-family:var(--f-titulo),sans-serif}.selo-data small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ouro)}
+.fav-canto{position:absolute;top:10px;right:10px;z-index:2}
+.pontos-barra{display:flex;align-items:center;gap:12px}.pontos-barra .barra{flex:1}
+.rank-pos{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--verde-s);color:var(--verde-t);font-weight:700;margin-right:10px}
+.rank-pos.top{background:var(--ouro);color:#14211E}
+.convite{border-left:4px solid var(--ouro)}

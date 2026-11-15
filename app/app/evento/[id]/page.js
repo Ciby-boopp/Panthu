@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import ConfirmarBotao from '@/components/ConfirmarBotao';
+import FavoritoBotao from '@/components/FavoritoBotao';
+import { favoritosDe } from '@/lib/favoritos';
 import Pessoas from '@/components/Pessoas';
 import Avatar from '@/components/Avatar';
 import AtualizarSozinho from '@/components/AtualizarSozinho';
@@ -29,6 +31,7 @@ export default async function Evento({ params }) {
     .eq('estabelecimento_id', est.id).order('ordem') : { data: [] };
   const podeAvaliar = confirmado && new Date(e.inicio) <= new Date();
   const { data: minhaAval } = podeAvaliar ? await sb.from('avaliacoes').select('nota_geral, organizacao, estrutura, interacao, comentario').eq('evento_id', id).eq('usuario_id', user.id).maybeSingle() : { data: null };
+  const [favEv, favEst] = await Promise.all([favoritosDe(sb, user.id, 'evento'), favoritosDe(sb, user.id, 'estabelecimento')]);
   const mapa = est?.latitude ? `https://www.openstreetmap.org/?mlat=${est.latitude}&mlon=${est.longitude}#map=17/${est.latitude}/${est.longitude}` : null;
 
   return (<>
@@ -47,6 +50,10 @@ export default async function Evento({ params }) {
         <div><span className="tag ok">{total ?? 0}{e.capacidade ? ` de ${e.capacidade}` : ''} confirmados</span>{confirmado && <span className="tag ok">Você vai!</span>}{conf?.status === 'presente' && <span className="tag ok">Presença registrada</span>}</div>
         {e.descricao && <p>{e.descricao}</p>}
         <ConfirmarBotao eventoId={id} usuarioId={user.id} confirmado={confirmado} />
+        <div className="j-acoes" style={{ justifyContent: 'flex-start' }}>
+          <FavoritoBotao tipo="evento" id={id} inicial={favEv.has(String(id))} rotulo="este encontro" />
+          {est?.id && <FavoritoBotao tipo="estabelecimento" id={est.id} inicial={favEst.has(String(est.id))} rotulo={est.nome} />}
+        </div>
         {sala && <Link className="btn s" href={`/app/chat/${sala.id}`}>Abrir chat do evento</Link>}
         {mapa && <a className="btn o" href={mapa} target="_blank" rel="noopener noreferrer">Ver no mapa</a>}
       </div>

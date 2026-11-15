@@ -4,6 +4,8 @@ import { criarServidor } from '@/lib/supabase/server';
 import Avatar from '@/components/Avatar';
 import AcoesPessoa from '@/components/AcoesPessoa';
 import AmigoBotao from '@/components/AmigoBotao';
+import FavoritoBotao from '@/components/FavoritoBotao';
+import { favoritosDe } from '@/lib/favoritos';
 import '@/components/chat.css';
 export const dynamic = 'force-dynamic';
 export default async function Pessoa({ params }) {
@@ -15,6 +17,7 @@ export default async function Pessoa({ params }) {
   if (!p) notFound();
   const { data: ep } = p.sou_eu ? { data: null } : await sb.rpc('estado_pedido', { outro: p.id });
   const e = ep?.[0] || { estado: 'nenhum', sala_id: null, pedido_id: null };
+  const favs = await favoritosDe(sb, user.id, 'pessoa');
   return (<>
     <p><Link href="/app/chat">← Voltar</Link></p>
     <div className="card" style={{ textAlign: 'center' }}>
@@ -25,6 +28,7 @@ export default async function Pessoa({ params }) {
         ? <Link className="btn p" href="/app/perfil">Editar meu perfil</Link>
         : <div style={{ display: 'grid', gap: 10, justifyItems: 'center' }}>
             <AmigoBotao id={p.id} euId={user.id} inicial={p.eh_amigo} />
+            <FavoritoBotao tipo="pessoa" id={p.id} inicial={favs.has(String(p.id))} rotulo={p.nome} />
             <div className="pessoa-linha" style={{ justifyContent: 'center', borderBottom: 0 }}>
               <AcoesPessoa id={p.id} estado={e.estado} salaId={e.sala_id} pedidoId={e.pedido_id} mesmoEvento={p.mesmo_evento} />
             </div>

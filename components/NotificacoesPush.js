@@ -16,7 +16,7 @@ export default function NotificacoesPush() {
   const [ativo, setAtivo] = useState(false);
   const [negado, setNegado] = useState(false);
   const [ocupado, setOcupado] = useState(false);
-  const [prefs, setPrefs] = useState({ previa: true, comunidade: true });
+  const [prefs, setPrefs] = useState({ previa: true, comunidade: true, eventos_regiao: true, eventos_interesse: true, jogos: true });
   const [msg, setMsg] = useState(null);
 
   useEffect(() => {
@@ -30,8 +30,8 @@ export default function NotificacoesPush() {
         const reg = await navigator.serviceWorker.getRegistration('/sw.js');
         const sub = await reg?.pushManager.getSubscription();
         setAtivo(!!sub && Notification.permission === 'granted');
-        const { data } = await getSb().from('push_prefs').select('previa, comunidade').maybeSingle();
-        if (data) setPrefs(data);
+        const { data } = await getSb().from('push_prefs').select('*').maybeSingle();
+        if (data) setPrefs((p) => ({ ...p, ...data }));
       } catch {}
       setEstado('ok');
     })();
@@ -84,6 +84,9 @@ export default function NotificacoesPush() {
           : <button className="btn p" onClick={ativar} disabled={ocupado || negado}>Ativar notificações</button>}
         {ativo && <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
           <label><input type="checkbox" checked={prefs.previa} onChange={(e) => mudar('previa', e.target.checked)} />Mostrar prévia da mensagem</label>
+          <label><input type="checkbox" checked={prefs.eventos_regiao !== false} onChange={(e) => mudar('eventos_regiao', e.target.checked)} />Avisar quando alguém da minha região criar um evento</label>
+          <label><input type="checkbox" checked={prefs.eventos_interesse !== false} onChange={(e) => mudar('eventos_interesse', e.target.checked)} />Avisar sobre atividades dos meus interesses</label>
+          <label><input type="checkbox" checked={prefs.jogos !== false} onChange={(e) => mudar('jogos', e.target.checked)} />Avisar quando um amigo me chamar para jogar</label>
           <label><input type="checkbox" checked={prefs.comunidade} onChange={(e) => mudar('comunidade', e.target.checked)} />Avisar sobre mensagens da comunidade</label>
         </div>}
         {msg && <div className="msg erro" role="status">{msg}</div>}

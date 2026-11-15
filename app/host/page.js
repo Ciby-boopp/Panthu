@@ -22,6 +22,7 @@ export default async function Host() {
   const totais = await Promise.all(eventos.map(async e => (await sb.rpc('total_confirmados', { ev: e.id })).data || 0));
   return (<><Topo papel={p.papel} /><main>
     <h1 style={{ fontSize: 32 }}>Área do Host</h1>
+    <p><Link className="btn ouro mini" href="/host/cupons">🎁 Conferir cupom de brinde</Link></p>
     {p.regiao && <p>Responsável pela região: <b>{p.regiao}</b></p>}
     <p>{[['ver_participantes', 'Participantes'], ['gerenciar_mesas', 'Mesas'], ['ver_dinamicas', 'Dinâmicas'], ['registrar_ocorrencias', 'Ocorrências']]
       .map(([k, t]) => <span key={k} className={`tag ${perm[k] ? 'ok' : ''}`}>{t}: {perm[k] ? 'sim' : 'não'}</span>)}</p>

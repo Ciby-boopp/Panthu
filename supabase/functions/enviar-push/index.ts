@@ -1,4 +1,4 @@
-// Edge Function "enviar-push": chamada por Database Webhooks quando entra uma mensagem ou um pedido de conversa.
+// Edge Function "enviar-push": chamada por Database Webhooks (mensagens, conversa_pedidos, eventos, jogos_convites, pontos_cupons).
 // Segredos necessários (Edge Functions → Secrets): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, WEBHOOK_SECRET.
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem automaticamente dentro da função.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
 
   let titulo = '', texto = '', url = '/app/chat', tag = 'panthu', ehComunidade = false;
   let elegiveis: Set<string> | null = null; // null = todos (comunidade)
+  let jogoPref = false;
 
   if (corpo.table === 'mensagens') {
     const [{ data: autor }, { data: sala }] = await Promise.all([
@@ -52,11 +53,41 @@ Deno.serve(async (req) => {
     titulo = 'Pedido para conversar'; texto = `${primeiroNome(de?.nome)} quer conversar com você`;
     url = '/app/chat'; tag = `pedido-${r.de}`;
     elegiveis = new Set([r.para]);
+  } else if (corpo.table === 'eventos') {
+    // Aviso personalizado: evento na cidade da pessoa ou ligado a um interesse dela.
+    const { data: est } = r.estabelecimento_id ? await sb.from('estabelecimentos').select('nome, endereco').eq('id', r.estabelecimento_id).maybeSingle() : { data: null };
+    const { data: pessoas } = await sb.from('perfis').select('id, cidade, interesses').eq('ativo', true).eq('bloqueado', false);
+    const prefsEv = new Map(((await sb.from('push_prefs').select('usuario_id, eventos_regiao, eventos_interesse')).data || []).map((p: any) => [p.usuario_id, p]));
+    const base = `${r.nome || ''} ${r.categoria || ''} ${r.descricao || ''}`.toLowerCase();
+    const endereco = String(est?.endereco || '').toLowerCase();
+    elegiveis = new Set();
+    let motivoRegiao = new Set<string>();
+    for (const p of pessoas || []) {
+      const pf = prefsEv.get(p.id);
+      const cidade = String(p.cidade || '').trim().toLowerCase();
+      const naRegiao = cidade.length >= 3 && endereco.includes(cidade) && pf?.eventos_regiao !== false;
+      const nosInteresses = (p.interesses || []).some((i: string) => base.includes(String(i).toLowerCase())) && pf?.eventos_interesse !== false;
+      if (naRegiao || nosInteresses) { elegiveis.add(p.id); if (naRegiao) motivoRegiao.add(p.id); }
+    }
+    if (!elegiveis.size) return ok();
+    titulo = 'Novo encontro para você'; texto = resumo(`${r.nome || 'Encontro'}${est?.nome ? ' · ' + est.nome : ''}`);
+    url = `/app/evento/${r.id}`; tag = `evento-${r.id}`;
+  } else if (corpo.table === 'jogos_convites') {
+    if (r.status !== 'pendente') return ok();
+    const { data: de } = await sb.from('perfis').select('nome').eq('id', r.de).maybeSingle();
+    titulo = 'Convite para jogar'; texto = `${primeiroNome(de?.nome)} te chamou para jogar ${r.jogo === 'memoria' ? 'Memória' : 'Truco'}`;
+    url = `/app/jogos?convite=${r.id}`; tag = `jogo-${r.id}`;
+    elegiveis = new Set([r.para]);
+    jogoPref = true;
+  } else if (corpo.table === 'pontos_cupons') {
+    titulo = 'Você ganhou um brinde! 🎁'; texto = 'Seu cupom de brinde já está disponível.';
+    url = '/app/pontos'; tag = `cupom-${r.id}`;
+    elegiveis = new Set([r.usuario_id]);
   } else return ok();
 
   const [{ data: subs }, { data: prefs }, { data: fora }] = await Promise.all([
     sb.from('push_inscricoes').select('id, usuario_id, endpoint, p256dh, auth').limit(5000),
-    sb.from('push_prefs').select('usuario_id, previa, comunidade'),
+    sb.from('push_prefs').select('usuario_id, previa, comunidade, jogos'),
     sb.from('perfis').select('id').or('ativo.eq.false,bloqueado.eq.true'),
   ]);
   const pref = new Map((prefs || []).map((p: any) => [p.usuario_id, p]));
@@ -67,6 +98,7 @@ Deno.serve(async (req) => {
     if (excluidos.has(s.usuario_id)) return false;
     if (elegiveis && !elegiveis.has(s.usuario_id)) return false;
     if (ehComunidade && pref.get(s.usuario_id)?.comunidade === false) return false;
+    if (jogoPref && pref.get(s.usuario_id)?.jogos === false) return false;
     return true;
   });
 

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Icone from './Icone';
+import FavoritoBotao from './FavoritoBotao';
 /* eslint-disable @next/next/no-img-element */
 export default function EventosLista({ eventos, vazio }) {
   const [q, setQ] = useState('');
@@ -19,7 +20,9 @@ export default function EventosLista({ eventos, vazio }) {
           <div className="card evento">
             <div className="banner">
               {e.banner_url && <img className="capa" src={e.banner_url} alt="" />}
-              <h3>{e.nome}</h3><div>{e.quando}</div>
+              <span className="selo-data" aria-hidden="true"><b>{e.dia}</b><small>{e.mes}</small></span>
+              <span className="fav-canto"><FavoritoBotao tipo="evento" id={e.id} inicial={e.favorito} compacto rotulo={e.nome} /></span>
+              <h3 style={{ marginTop: 34 }}>{e.nome}</h3><div>{e.quando}</div>
               <div className="local">
                 <div className="logo-local">{e.logo_url ? <img src={e.logo_url} alt="" /> : 'logo'}</div>
                 <b>{e.local}</b>

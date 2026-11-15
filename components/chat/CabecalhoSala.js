@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Icone from '../Icone';
+import FavoritoBotao from '../FavoritoBotao';
 
 export const SUBTITULO = {
   geral: 'Aqui conversa todo mundo do Panthu.',
@@ -7,7 +8,7 @@ export const SUBTITULO = {
   privada: 'Conversa entre duas pessoas que vão ao mesmo evento.'
 };
 
-export default function CabecalhoSala({ titulo, tipo }) {
+export default function CabecalhoSala({ titulo, tipo, salaId, favorito = false }) {
   const chave = tipo === 'geral' || tipo === 'evento' ? tipo : 'privada';
   return (
     <header className="sala-cab">
@@ -17,6 +18,7 @@ export default function CabecalhoSala({ titulo, tipo }) {
         <h1>{titulo}</h1>
         <small>{SUBTITULO[chave]}</small>
       </div>
+      {salaId && chave !== 'privada' && <span style={{ marginLeft: 'auto' }}><FavoritoBotao tipo="grupo" id={salaId} inicial={favorito} compacto rotulo={titulo} /></span>}
     </header>
   );
 }
