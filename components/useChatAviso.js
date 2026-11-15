@@ -14,7 +14,8 @@ export default function useChatAviso(path) {
   const [geralId, setGeralId] = useState(null);
   const eu = useRef(null), salaRef = useRef(null), geralRef = useRef(null);
 
-  const sala = path.match(/^\/app\/chat\/([^/]+)/)?.[1] || (path === '/app/chat' ? geralId : null);
+  const largo = typeof window !== 'undefined' && window.matchMedia('(min-width: 861px)').matches; // no computador /app/chat já abre a comunidade
+  const sala = path.match(/^\/app\/chat\/([^/]+)/)?.[1] || (path === '/app/chat' && largo ? geralId : null);
   salaRef.current = sala; geralRef.current = geralId;
 
   const carregar = useCallback(async () => {
@@ -51,7 +52,7 @@ export default function useChatAviso(path) {
           if (!m || m.autor_id === eu.current) return;
           if (m.sala_id === salaRef.current) { sb.rpc('marcar_lida', { sl: m.sala_id }); return; }
           setMapa((x) => ({ ...x, [m.sala_id]: (x[m.sala_id] || 0) + 1 }));
-          setAviso({ id: m.id || Date.now(), titulo: 'Nova mensagem', hora: hora(m.criado_em), texto: String(m.texto || '').slice(0, 90), href: m.sala_id === geralRef.current ? '/app/chat' : `/app/chat/${m.sala_id}` });
+          setAviso({ id: m.id || Date.now(), titulo: 'Nova mensagem', hora: hora(m.criado_em), texto: String(m.texto || '').slice(0, 90), href: `/app/chat/${m.sala_id}` });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversa_pedidos', filter: `para=eq.${user.id}` }, async () => {
           const lista = await carregar();

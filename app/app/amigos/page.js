@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SubAbas from '@/components/SubAbas';
 import { criarServidor } from '@/lib/supabase/server';
 import Avatar from '@/components/Avatar';
 import AmigoBotao from '@/components/AmigoBotao';
@@ -9,8 +10,8 @@ export default async function Amigos() {
   const { data: { user } } = await sb.auth.getUser();
   const { data: lista, error } = await sb.rpc('meus_amigos');
   return (<>
-    <p><Link href="/app/perfil">← Meu perfil</Link></p>
     <h1 style={{ fontSize: 32 }}>Meus amigos</h1>
+    <SubAbas itens={[['/app/proximo', 'Perto de você'], ['/app/amigos', 'Meus amigos']]} ativo="/app/amigos" rotulo="Perto" />
     <p style={{ color: 'var(--suave)' }}>Pessoas que você salvou para encontrar de novo. Elas não são avisadas e nada é compartilhado com elas.</p>
     {error && <div className="msg erro">Não foi possível carregar a lista. Confira se o SQL das novas funcionalidades foi executado no Supabase.</div>}
     <div className="card">

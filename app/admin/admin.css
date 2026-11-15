@@ -1,1 +1,35 @@
-/* Estilos do admin agora vivem em app/globals.css (tema, campos, abas). Arquivo mantido para o import existente. */
+/* Layout do ADM: menu lateral no computador, faixa rolável no celular. Usa as cores do tema Panthu (globals.css). */
+main.adm-main{max-width:1280px}
+.adm-grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px;align-items:start}
+.adm-menu{position:sticky;top:84px;display:grid;gap:18px;background:var(--card);border:1px solid var(--borda);border-radius:var(--raio);padding:14px;box-shadow:var(--sombra)}
+.adm-grupo{display:grid;gap:4px}
+.adm-titulo{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);padding:0 10px 4px}
+.adm-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--texto);font-weight:600;font-size:15px;transition:background .2s}
+.adm-menu a svg{width:20px;height:20px;flex:none}
+.adm-menu a:hover{background:var(--verde-s)}
+.adm-menu a[aria-current=page]{background:var(--verde);color:#fff}
+.adm-conteudo{min-width:0}
+.adm-conteudo h1{margin-top:0}
+@media (max-width:860px){
+  .adm-grid{grid-template-columns:1fr;gap:12px}
+  .adm-menu{position:static;display:flex;gap:6px;overflow-x:auto;padding:8px;border-radius:999px;scrollbar-width:none}
+  .adm-grupo{display:contents}
+  .adm-titulo{display:none}
+  .adm-menu a{white-space:nowrap;padding:8px 14px;border-radius:999px;font-size:14px}
+}
+/* Blocos do painel */
+.adm-sec{margin:26px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave)}
+.adm-duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.adm-duas .card{margin:0}
+.stat a{color:inherit;text-decoration:none}
+.stat small{color:var(--suave);font-size:13px}
+.adm-conteudo .up{color:var(--verde-t)}.adm-conteudo .down{color:var(--perigo-t)}
+.barras{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:10px}
+.barras.fino{gap:3px}
+.barra{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;font-size:11px;color:var(--suave)}
+.barra i{display:block;width:100%;min-height:2px;background:var(--verde);border-radius:6px 6px 0 0}
+.barra b{font-size:12px;color:var(--texto)}
+.linha-rank{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--borda)}
+.linha-rank:last-child{border-bottom:0}
+.tabela-rol{overflow-x:auto}
+.vazio-nota{color:var(--suave);margin:6px 0 0}
