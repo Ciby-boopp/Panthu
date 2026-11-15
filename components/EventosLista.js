@@ -3,21 +3,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Icone from './Icone';
 /* eslint-disable @next/next/no-img-element */
-export default function EventosLista({ eventos }) {
+export default function EventosLista({ eventos, vazio }) {
   const [q, setQ] = useState('');
-  const [so, setSo] = useState(false);
   const termo = q.trim().toLowerCase();
-  const lista = eventos.filter(e => (!so || e.confirmado) && (!termo || `${e.nome} ${e.local}`.toLowerCase().includes(termo)));
+  const lista = eventos.filter(e => !termo || `${e.nome} ${e.local}`.toLowerCase().includes(termo));
   return (<>
     <div className="busca">
       <Icone nome="busca" />
       <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar encontro ou local" aria-label="Buscar encontro ou local" />
     </div>
-    <div className="abas">
-      <button type="button" className={`btn mini ${!so ? 'p' : 'o'}`} onClick={() => setSo(false)}>Todos</button>
-      <button type="button" className={`btn mini ${so ? 'p' : 'o'}`} onClick={() => setSo(true)}>Minhas presenças</button>
-    </div>
-    {lista.length === 0 && <div className="card vazio"><h3>{eventos.length === 0 ? 'Nenhum encontro marcado ainda' : 'Nenhum encontro encontrado'}</h3><p>{eventos.length === 0 ? 'Assim que um novo encontro for publicado, ele aparece aqui.' : 'Tente outro nome ou limpe o filtro.'}</p></div>}
+    {lista.length === 0 && <div className="card vazio"><h3>{eventos.length === 0 ? vazio.titulo : 'Nenhum encontro encontrado'}</h3><p>{eventos.length === 0 ? vazio.texto : 'Tente outro nome ou limpe a busca.'}</p></div>}
     <div className="grade-eventos">
       {lista.map(e => (
         <Link key={e.id} href={`/app/evento/${e.id}`}>
