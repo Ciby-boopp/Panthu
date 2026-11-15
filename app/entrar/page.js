@@ -11,7 +11,7 @@ function motivoCadastro(error) {
   const c = error.code || '', m = (error.message || '').toLowerCase();
   let t = 'Não foi possível criar a conta agora.';
   if (c === 'user_already_exists' || m.includes('already registered')) t = 'Este e-mail já tem cadastro. Toque em “Já tenho conta” para entrar, ou use “Esqueci a senha”.';
-  else if (c === 'weak_password' || m.includes('password')) t = 'A senha foi recusada. Use pelo menos 8 caracteres, misturando letras e números.';
+  else if (c === 'weak_password' || m.includes('password')) t = `A senha foi recusada pelo servidor. ${SENHA_REGRA}`;
   else if (c === 'over_email_send_rate_limit' || c === 'over_request_rate_limit' || error.status === 429) t = 'Muitas tentativas em pouco tempo. Aguarde cerca de uma hora e tente de novo.';
   else if (c === 'email_address_invalid' || (m.includes('invalid') && m.includes('email'))) t = 'O Supabase recusou este e-mail. Confira se está escrito corretamente.';
   else if (c === 'signup_disabled') t = 'Os cadastros estão desativados no momento.';

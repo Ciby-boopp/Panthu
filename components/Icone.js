@@ -15,6 +15,9 @@ const D = {
   local: <><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></>,
   check: <><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></>,
   jogos: <><rect x="4" y="3" width="12" height="16" rx="2.5"/><path d="M9 21h8a3 3 0 003-3V8"/><path d="M10 8.5l2 2.5-2 2.5-2-2.5z"/></>,
+  enviar: <><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></>,
+  voltar: <path d="M15 5l-7 7 7 7"/>,
+  emoji: <><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 007 0M9 9.5h.01M15 9.5h.01"/></>,
   alerta: <><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.5"/></>,
 };
 export default function Icone({ nome, className = '' }) {

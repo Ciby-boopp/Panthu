@@ -5,6 +5,7 @@ import Logo from './Logo';
 import Sair from './Sair';
 import Icone from './Icone';
 import useChatAviso from './useChatAviso';
+import RegistrarAtividade from './RegistrarAtividade';
 
 export default function Topo({ papel }) {
   const path = usePathname() || '';
@@ -20,6 +21,7 @@ export default function Topo({ papel }) {
   ];
   const aba = (i) => <Link key={i.href} href={i.href} className="aba" aria-current={i.ativo ? 'page' : undefined}><span className="ico-wrap"><Icone nome={i.icone} />{i.href === '/app/chat' && nao > 0 && <span className="selo" aria-label={`${nao} mensagens novas`}>{nao > 9 ? '9+' : nao}</span>}</span>{i.nome}</Link>;
   return (<>
+    <RegistrarAtividade />
     {aviso && (
       <Link href={aviso.href} className="toast" role="status" aria-live="polite" onClick={fechar}>
         <Icone nome="chat" /><span><b>{aviso.titulo || 'Nova mensagem'}</b> · às {aviso.hora}<small>{aviso.texto}</small></span>
