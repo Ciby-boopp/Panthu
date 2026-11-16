@@ -99,15 +99,17 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
         {aviso && <p className={`msg ${aviso.erro ? 'erro' : 'ok'}`} role="status">{aviso.t}</p>}
         {alta.length > 0 && <p className="msg ok" role="status">🔥 {alta.map((x) => NOME[x.jogo]).filter(Boolean).join(' e ')} {alta.length > 1 ? 'estão em alta' : 'está em alta'} no momento. Entre para jogar!</p>}
         <div className="j-acoes" style={{ justifyContent: 'flex-start', marginTop: 14 }}>
-          <button className="btn ouro" onClick={() => setChamar(true)}>👋 Chamar um amigo para jogar</button>
+          <button className="btn ouro" onClick={() => setChamar(true)}>Jogar agora com um amigo 🎮</button>
           <Link className="btn s" href="/app/pontos">Meus pontos</Link>
         </div>
         {chamar && <ChamarAmigo jogoInicial={chamar === true ? null : chamar} aoCriar={abrirSala} fechar={() => setChamar(null)} />}
-        <div className="grade-eventos" style={{ marginTop: 18 }}>
+        <div className="j-tiles">
           {JOGOS.map((j) => (
-            <button key={j.id} className="card j-card" onClick={() => escolher(j.id)}>
-              <span className="j-icone"><IconeJogo id={j.id} /></span>
-              <span><b>{j.nome}</b><small>{j.desc}</small>{alta.some((x) => x.jogo === j.id) && <span className="tag ok" style={{ marginTop: 6 }}>🔥 Em alta agora</span>}</span>
+            <button key={j.id} className="j-tile" onClick={() => escolher(j.id)}>
+              <span className="j-icone"><IconeJogo id={j.id} tam={56} /></span>
+              <span>{j.nome}</span>
+              <small>{j.desc}</small>
+              {alta.some((x) => x.jogo === j.id) && <span className="tag ok" style={{ margin: 0 }}>🔥 Em alta agora</span>}
             </button>
           ))}
         </div>

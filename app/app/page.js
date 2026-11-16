@@ -1,44 +1,53 @@
+import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
-import EventosLista from '@/components/EventosLista';
-import SubAbas from '@/components/SubAbas';
-import { favoritosDe } from '@/lib/favoritos';
+import Avatar from '@/components/Avatar';
+import Icone from '@/components/Icone';
 export const dynamic = 'force-dynamic';
-const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Sao_Paulo' });
+export const metadata = { title: 'Início' };
 
-const ABAS = [['/app', 'Próximos'], ['/app?aba=minhas', 'Minhas presenças'], ['/app?aba=passados', 'Realizados']];
-const SUBTITULO = { proximos: 'Próximos encontros', minhas: 'Encontros em que você confirmou presença', passados: 'Encontros que já aconteceram' };
-const VAZIO = {
-  proximos: { titulo: 'Nenhum encontro marcado ainda', texto: 'Assim que um novo encontro for publicado, ele aparece aqui.' },
-  minhas: { titulo: 'Você ainda não confirmou presença', texto: 'Abra um encontro em “Próximos” e confirme para ele aparecer aqui.' },
-  passados: { titulo: 'Nenhum encontro realizado ainda', texto: 'Os encontros que já aconteceram ficam guardados aqui.' }
-};
+const dia = (d) => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', timeZone: 'America/Sao_Paulo' });
+const mes = (d) => new Date(d).toLocaleDateString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '');
 
-export default async function Eventos({ searchParams }) {
-  const sp = await searchParams;
-  const aba = ['minhas', 'passados'].includes(sp?.aba) ? sp.aba : 'proximos';
+export default async function Inicio() {
   const sb = await criarServidor();
   const { data: { user } } = await sb.auth.getUser();
   const { data: perfil } = await sb.from('perfis').select('nome').eq('id', user.id).single();
-  const agora = new Date().toISOString();
-  let consulta = sb.from('eventos').select('id, nome, inicio, banner_url, capacidade, estabelecimentos(nome, logo_url)');
-  consulta = aba === 'passados' ? consulta.lt('inicio', agora).order('inicio', { ascending: false }).limit(30) : consulta.gte('inicio', agora).order('inicio');
-  const { data: eventos } = await consulta;
-  const { data: minhas } = await sb.from('confirmacoes').select('evento_id').eq('usuario_id', user.id).in('status', ['confirmado', 'presente']);
-  const meus = new Set((minhas || []).map(c => c.evento_id));
-  const favs = await favoritosDe(sb, user.id, 'evento');
-  const base = (eventos || []).filter(e => aba !== 'minhas' || meus.has(e.id));
-  const totais = await Promise.all(base.map(async e => (await sb.rpc('total_confirmados', { ev: e.id })).data || 0));
-  const itens = base.map((e, i) => ({
-    id: e.id, nome: e.nome, quando: quando(e.inicio), banner_url: e.banner_url, capacidade: e.capacidade,
-    local: e.estabelecimentos?.nome || 'Local a definir', logo_url: e.estabelecimentos?.logo_url || null,
-    total: totais[i], confirmado: meus.has(e.id), favorito: favs.has(String(e.id)),
-    dia: new Date(e.inicio).toLocaleDateString('pt-BR', { day: '2-digit', timeZone: 'America/Sao_Paulo' }),
-    mes: new Date(e.inicio).toLocaleDateString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '')
-  }));
+  const { data: eventos } = await sb.from('eventos').select('id, nome, inicio, banner_url, estabelecimentos(nome)').gte('inicio', new Date().toISOString()).order('inicio').limit(3);
+  const { data: pessoas } = await sb.rpc('pessoas_para_jogar');
+  const lista = eventos || [];
   return (<div className="pag-larga">
-    <h1 style={{ fontSize: 32 }}>Oi, {perfil?.nome?.split(' ')[0]}!</h1>
-    <SubAbas itens={ABAS} ativo={aba === 'proximos' ? '/app' : `/app?aba=${aba}`} rotulo="Encontros" />
-    <p style={{ color: 'var(--suave)', margin: '0 0 4px' }}>{SUBTITULO[aba]}</p>
-    <EventosLista key={aba} eventos={itens} vazio={VAZIO[aba]} />
+    <header className="ini-saudacao">
+      <h1>Olá, {perfil?.nome?.split(' ')[0] || 'bem-vindo'}! <span aria-hidden="true">👋</span></h1>
+      <p>Que bom ter você por aqui!</p>
+    </header>
+    <form action="/app/eventos" method="get" className="busca" role="search">
+      <Icone nome="busca" />
+      <input type="search" name="q" placeholder="Buscar eventos, pessoas…" aria-label="Buscar eventos" />
+    </form>
+    <section className="ini-hero" aria-label="Destaque">
+      <div>
+        <h2>Encontre eventos perto de você!</h2>
+        <p>Faça novas conexões e aproveite cada momento.</p>
+        <Link className="btn ouro" href="/app/proximo">Explorar →</Link>
+      </div>
+    </section>
+    <div className="linha ini-sec"><h2>Eventos em destaque</h2><Link href="/app/eventos">Ver todos →</Link></div>
+    {lista.length === 0 ? <div className="card vazio">Nenhum encontro marcado ainda. Assim que houver um, ele aparece aqui.</div> : lista.map((e) => (
+      <Link key={e.id} href={`/app/evento/${e.id}`} className="ev-card ev-mini" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <span className="ev-link">
+          <span className="ev-thumb" style={{ width: 84 }}>{e.banner_url ? <img src={e.banner_url} alt="" /> : <span className="ev-sem">🎉</span>}<span className="selo-data" aria-hidden="true"><small>{mes(e.inicio)}</small><b>{dia(e.inicio)}</b></span></span>
+          <span className="ev-info"><h3>{e.nome}</h3><span className="ev-linha"><Icone nome="local" />{e.estabelecimentos?.nome || 'Local a definir'}</span></span>
+        </span>
+      </Link>
+    ))}
+    <div className="linha ini-sec"><h2>Suas conexões</h2><Link href="/app/amigos">Ver todos →</Link></div>
+    {(pessoas || []).length === 0 ? <div className="card vazio">Salve amigos ou converse com alguém para vê-los aqui.</div> : (
+      <div className="ini-pessoas">
+        {pessoas.slice(0, 8).map((p) => (
+          <Link key={p.id} href={`/app/pessoa/${p.id}`} className="ini-pessoa"><Avatar url={p.foto_url} nome={p.nome} tam={64} /><b>{p.nome}</b></Link>
+        ))}
+      </div>
+    )}
+    <Link href="/app/jogos" className="ini-jogos"><span aria-hidden="true">🏆</span><span><b>Desafie seus amigos!</b><small>Jogue, ganhe pontos e brindes na comunidade.</small></span></Link>
   </div>);
 }

@@ -33,7 +33,10 @@ export default async function Admin() {
   const saldoMes = Number(r.receitas_mes) - Number(r.despesas_mes);
 
   return (<>
-    <h1 style={{ fontSize: 32 }}>Painel ADM</h1>
+    <header className="adm-topo"><span className="adm-selo">ADM</span><h1>Painel Administrativo</h1><p>Gerencie tudo em um só lugar</p></header>
+    <nav className="adm-tiles" aria-label="Atalhos do painel">
+      {[['/admin/conexoes', 'Conexões', 'usuarios'], ['/admin/usuarios', 'Usuários', 'perfil'], ['/admin/eventos', 'Eventos', 'eventos'], ['/admin/estabelecimentos', 'Estabelecimentos', 'local'], ['/admin/avaliacoes', 'Avaliações', 'check'], ['/admin/denuncias', 'Denúncias', 'alerta'], ['/admin/auditoria', 'Auditoria', 'busca'], ['/admin/pontos', 'Pontos e brindes', 'jogos']].map(([h, n, ic]) => <Link key={h} href={h} className="adm-tile"><Icone nome={ic} />{n}</Link>)}
+    </nav>
     <div className="linha" style={{ justifyContent: 'flex-start' }}>
       <Link className="btn p" href="/admin/eventos/novo">+ Novo evento</Link>
       <Link className="btn s" href="/admin/estabelecimentos/novo">+ Novo estabelecimento</Link>
