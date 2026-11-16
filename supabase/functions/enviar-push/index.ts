@@ -1,4 +1,4 @@
-// Edge Function "enviar-push": chamada por Database Webhooks (mensagens, conversa_pedidos, eventos, jogos_convites, pontos_cupons).
+// Edge Function "enviar-push": chamada por Database Webhooks (mensagens, conversa_pedidos, eventos, jogos_convites, pontos_cupons, jogos_alta).
 // Segredos necessários (Edge Functions → Secrets): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, WEBHOOK_SECRET.
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem automaticamente dentro da função.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
   let titulo = '', texto = '', url = '/app/chat', tag = 'panthu', ehComunidade = false;
   let elegiveis: Set<string> | null = null; // null = todos (comunidade)
   let jogoPref = false;
+  let jogandoAgora: Set<string> | null = null;
 
   if (corpo.table === 'mensagens') {
     const [{ data: autor }, { data: sala }] = await Promise.all([
@@ -75,10 +76,17 @@ Deno.serve(async (req) => {
   } else if (corpo.table === 'jogos_convites') {
     if (r.status !== 'pendente') return ok();
     const { data: de } = await sb.from('perfis').select('nome').eq('id', r.de).maybeSingle();
-    titulo = 'Convite para jogar'; texto = `${primeiroNome(de?.nome)} te chamou para jogar ${r.jogo === 'memoria' ? 'Memória' : 'Truco'}`;
+    titulo = 'Convite para jogar'; texto = `${primeiroNome(de?.nome)} te chamou para jogar ${({ memoria: 'Memória', xadrez: 'Xadrez', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' } as Record<string, string>)[r.jogo] || 'Truco'}`;
     url = `/app/jogos?convite=${r.id}`; tag = `jogo-${r.id}`;
     elegiveis = new Set([r.para]);
     jogoPref = true;
+  } else if (corpo.table === 'jogos_alta') {
+    const nomes: Record<string, string> = { xadrez: 'Xadrez', truco: 'Truco', memoria: 'Memória', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' };
+    titulo = `${nomes[r.jogo] || 'Um jogo'} está em alta!`; texto = `Tem ${r.jogadores} pessoas jogando agora. Entre para jogar!`;
+    url = `/app/jogos?jogo=${r.jogo}`; tag = `alta-${r.jogo}`;
+    jogoPref = true;
+    const { data: jogando } = await sb.from('jogos_ativos').select('usuario_id').eq('jogo', r.jogo);
+    jogandoAgora = new Set((jogando || []).map((x: any) => x.usuario_id));
   } else if (corpo.table === 'pontos_cupons') {
     titulo = 'Você ganhou um brinde! 🎁'; texto = 'Seu cupom de brinde já está disponível.';
     url = '/app/pontos'; tag = `cupom-${r.id}`;
@@ -93,6 +101,7 @@ Deno.serve(async (req) => {
   const pref = new Map((prefs || []).map((p: any) => [p.usuario_id, p]));
   const excluidos = new Set((fora || []).map((p: any) => p.id));
   if (corpo.table === 'mensagens') excluidos.add(r.autor_id);
+  if (jogandoAgora) jogandoAgora.forEach((id) => excluidos.add(id));
 
   const alvos = (subs || []).filter((s: any) => {
     if (excluidos.has(s.usuario_id)) return false;

@@ -65,7 +65,13 @@ export default function useChatAviso(path) {
           const c = p.new;
           const { data: v } = await getSb().rpc('ver_convite', { p_id: c.id });
           const nome = v?.[0]?.de_nome || 'Um amigo';
-          setAviso({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${c.jogo === 'memoria' ? 'Memória' : 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
+          setAviso({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${({ memoria: 'Memória', xadrez: 'Xadrez', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' })[c.jogo] || 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jogos_alta' }, (p) => {
+          const j = p.new;
+          if (!j || window.__panthuJogando === j.jogo) return;
+          const nomes = { xadrez: 'Xadrez', truco: 'Truco', memoria: 'Memória', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' };
+          setAviso({ id: j.id, titulo: `${nomes[j.jogo] || 'Um jogo'} está em alta!`, hora: hora(), texto: `Tem ${j.jogadores} pessoas jogando agora. Entre para jogar!`, href: `/app/jogos?jogo=${j.jogo}` });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pontos_cupons', filter: `usuario_id=eq.${user.id}` }, () => {
           setAviso({ id: Date.now(), titulo: 'Você ganhou um brinde! 🎁', hora: hora(), texto: 'Seu cupom de brinde já está disponível.', href: '/app/pontos' });

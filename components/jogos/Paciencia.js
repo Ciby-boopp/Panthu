@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
+import SalaDuelo from './SalaDuelo';
+import DueloCorrida from './DueloCorrida';
 import { NAIPES, baralho, embaralhar, rng, rank, vermelho } from '@/lib/cartas';
 
 const topo = (a) => a[a.length - 1];
@@ -145,37 +147,24 @@ function PacienciaJogo({ semente, rotulo, aoFim }) {
   );
 }
 
-export default function Paciencia({ modo, aoTerminar }) {
+export default function Paciencia({ modo, aoTerminar, auto }) {
   const [semente, setSemente] = useState(() => Math.floor(Math.random() * 1e9));
-  const [etapa, setEtapa] = useState(0); // 0 jogador 1 · 1 troca · 2 jogador 2 · 3 resultado
-  const [res, setRes] = useState([]);
   const [rodada, setRodada] = useState(0);
-  const novo = () => { setSemente(Math.floor(Math.random() * 1e9)); setEtapa(0); setRes([]); setRodada((r) => r + 1); };
-
-  if (modo === 'solo') {
+  if (modo === 'solo' && !auto) {
     return (<>
       <PacienciaJogo key={`s${rodada}`} semente={semente} rotulo="" aoFim={(pontos, vitoria, d) => aoTerminar?.({ pontos, vitoria, detalhes: d })} />
-      <div className="j-acoes"><button className="btn p" onClick={novo}>Novo jogo</button></div>
+      <div className="j-acoes"><button className="btn p" onClick={() => { setSemente(Math.floor(Math.random() * 1e9)); setRodada((r) => r + 1); }}>Novo jogo</button></div>
     </>);
   }
-  if (etapa === 0) return <PacienciaJogo key={`a${rodada}`} semente={semente} rotulo="Jogador 1" aoFim={(p, v, d) => { setRes([{ p, v, d }]); setEtapa(1); }} />;
-  if (etapa === 1) return (
-    <div className="j-mesa" style={{ textAlign: 'center' }}>
-      <h3>Jogador 1 fez {res[0].p} pontos</h3>
-      <p>Agora é a vez do Jogador 2, com <b>as mesmas cartas</b>. Passe o aparelho!</p>
-      <button className="btn p" onClick={() => setEtapa(2)}>Começar Jogador 2</button>
-    </div>
-  );
-  if (etapa === 2) return <PacienciaJogo key={`b${rodada}`} semente={semente} rotulo="Jogador 2" aoFim={(p2, v2, d2) => {
-    const p1 = res[0].p;
-    setRes([res[0], { p: p2, v: v2, d: d2 }]); setEtapa(3);
-    aoTerminar?.({ pontos: p1, vitoria: p1 === p2 ? null : p1 > p2, detalhes: { ...res[0].d, pontos_j2: p2 } });
-  }} />;
+  // 2 jogadores em celulares diferentes: o mesmo baralho para os dois; vence quem fizer mais pontos.
   return (
-    <div className="j-mesa" style={{ textAlign: 'center' }}>
-      <h3>{res[0].p === res[1].p ? 'Empate!' : `Jogador ${res[0].p > res[1].p ? 1 : 2} venceu!`}</h3>
-      <p>Jogador 1: <b>{res[0].p}</b> pontos · Jogador 2: <b>{res[1].p}</b> pontos</p>
-      <button className="btn p" onClick={novo}>Jogar de novo</button>
-    </div>
+    <SalaDuelo jogo="paciencia" titulo="Paciência" auto={auto} novaCfg={() => ({ semente: Math.floor(Math.random() * 1e9) })}>
+      {({ cfg, enviar, ouvir }) => (
+        <DueloCorrida enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar}
+          comparar={(a, b) => a.pontos - b.pontos}
+          resumo={(r) => `${r.pontos} pontos${r.venceu ? ' (completou!)' : ''}`}
+          renderJogo={({ aoFim }) => <PacienciaJogo semente={cfg.semente} rotulo="Mesmo baralho do amigo" aoFim={(pontos, vitoria) => aoFim({ pontos, venceu: !!vitoria })} />} />
+      )}
+    </SalaDuelo>
   );
 }

@@ -1,29 +1,32 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import Blackjack from './Blackjack';
+import Xadrez from './Xadrez';
+import CacaPalavras from './CacaPalavras';
+import IconeJogo from './Icones';
+import useJogandoAgora from './useJogandoAgora';
 import Memoria from './Memoria';
 import Truco from './Truco';
 import Paciencia from './Paciencia';
 import Placar from './Placar';
-import Carta from './Carta';
 import ChamarAmigo from './ChamarAmigo';
 import RankingGeral from './RankingGeral';
 import { salvarPartida } from '@/lib/placar';
 import { criarCliente } from '@/lib/supabase/client';
 
 const JOGOS = [
-  { id: 'blackjack', nome: 'Blackjack', desc: 'Chegue o mais perto de 21 sem estourar.', Comp: Blackjack, c: { v: 'A', n: '♠' } },
-  { id: 'memoria', nome: 'Memória', desc: 'Encontre os pares de cartas. Também online com um amigo.', Comp: Memoria, c: { v: 'Q', n: '♥' }, online: true },
-  { id: 'truco', nome: 'Truco', desc: 'Truco paulista contra o computador ou online.', Comp: Truco, c: { v: '4', n: '♣' }, online: true },
-  { id: 'paciencia', nome: 'Paciência', desc: 'O clássico Klondike, de 1 a 2 jogadores.', Comp: Paciencia, c: { v: 'K', n: '♦' } },
+  { id: 'xadrez', nome: 'Xadrez', desc: 'Regras oficiais. Contra o computador ou um amigo.', Comp: Xadrez },
+  { id: 'truco', nome: 'Truco', desc: 'Truco paulista: grite, aceite ou corra.', Comp: Truco },
+  { id: 'memoria', nome: 'Memória', desc: 'Ache os pares de figuras. Quem faz mais pares vence.', Comp: Memoria },
+  { id: 'paciencia', nome: 'Paciência', desc: 'Klondike. No duelo, mesmo baralho para os dois.', Comp: Paciencia },
+  { id: 'cacapalavras', nome: 'Caça-palavras', desc: 'Ache as palavras antes do amigo.', Comp: CacaPalavras },
 ];
-const NOME = { truco: 'Truco', memoria: 'Memória' };
+const NOME = Object.fromEntries(JOGOS.map((j) => [j.id, j.nome]));
 
-export default function Jogos({ conviteId = null }) {
+export default function Jogos({ conviteId = null, jogoInicial = null }) {
   const sb = useRef(null);
   const cli = () => (sb.current ||= criarCliente());
-  const [id, setId] = useState(null);
+  const [id, setId] = useState(JOGOS.some((j) => j.id === jogoInicial) ? jogoInicial : null);
   const [modo, setModo] = useState('solo');
   const [chave, setChave] = useState(0);
   const [aviso, setAviso] = useState(null);
@@ -33,6 +36,9 @@ export default function Jogos({ conviteId = null }) {
   const [espera, setEspera] = useState(null); // convite enviado, aguardando resposta
   const [recebidos, setRecebidos] = useState([]);
   const jogo = JOGOS.find((j) => j.id === (partida ? partida.jogo : id));
+  useJogandoAgora(jogo?.id);
+  const [alta, setAlta] = useState([]);
+  useEffect(() => { if (jogo) return; (async () => { const { data } = await cli().rpc('jogos_em_alta'); setAlta(data || []); })(); }, [jogo]);
 
   const carregarConvites = useCallback(async () => {
     const { data: ls } = await cli().from('jogos_convites').select('id').eq('status', 'pendente').gt('criado_em', new Date(Date.now() - 10 * 60 * 1000).toISOString());
@@ -91,6 +97,7 @@ export default function Jogos({ conviteId = null }) {
           </div>
         ))}
         {aviso && <p className={`msg ${aviso.erro ? 'erro' : 'ok'}`} role="status">{aviso.t}</p>}
+        {alta.length > 0 && <p className="msg ok" role="status">🔥 {alta.map((x) => NOME[x.jogo]).filter(Boolean).join(' e ')} {alta.length > 1 ? 'estão em alta' : 'está em alta'} no momento. Entre para jogar!</p>}
         <div className="j-acoes" style={{ justifyContent: 'flex-start', marginTop: 14 }}>
           <button className="btn ouro" onClick={() => setChamar(true)}>👋 Chamar um amigo para jogar</button>
           <Link className="btn s" href="/app/pontos">Meus pontos</Link>
@@ -99,17 +106,27 @@ export default function Jogos({ conviteId = null }) {
         <div className="grade-eventos" style={{ marginTop: 18 }}>
           {JOGOS.map((j) => (
             <button key={j.id} className="card j-card" onClick={() => escolher(j.id)}>
-              <Carta c={j.c} largura="58px" />
-              <span><b>{j.nome}</b><small>{j.desc}</small></span>
+              <span className="j-icone"><IconeJogo id={j.id} /></span>
+              <span><b>{j.nome}</b><small>{j.desc}</small>{alta.some((x) => x.jogo === j.id) && <span className="tag ok" style={{ marginTop: 6 }}>🔥 Em alta agora</span>}</span>
             </button>
           ))}
         </div>
         <RankingGeral atualizar={atualizar} />
+        <details className="card">
+          <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Como funciona a disputa entre dois celulares</summary>
+          <ul style={{ marginBottom: 0 }}>
+            <li><b>Xadrez:</b> vence quem der xeque-mate ou quando o outro desistir. Afogamento, repetição tripla, regra dos 50 lances e falta de peças dão empate.</li>
+            <li><b>Truco:</b> vence quem chegar primeiro a 12 pontos. Quem recebe um pedido pode aceitar, correr ou aumentar.</li>
+            <li><b>Memória:</b> jogam por turnos no mesmo tabuleiro. Quem achar um par joga de novo. Vence quem fizer mais pares; igual é empate.</li>
+            <li><b>Paciência:</b> os dois recebem o mesmo baralho e jogam ao mesmo tempo. Vence quem fizer mais pontos (completar o jogo dá bônus de tempo).</li>
+            <li><b>Caça-palavras:</b> mesmas palavras para os dois. Vence quem achar mais; se empatar, quem achou a última palavra mais rápido.</li>
+          </ul>
+        </details>
       </>
     );
   }
   const Comp = jogo.Comp;
-  const rotuloDois = jogo.id === 'truco' ? '2 jogadores (online)' : '2 jogadores (mesmo aparelho)';
+  const rotuloDois = '2 jogadores (online)';
   return (
     <>
       <div className="linha" style={{ margin: '12px 0' }}>
@@ -119,7 +136,7 @@ export default function Jogos({ conviteId = null }) {
           <button className={`btn mini ${modo === 'solo' ? 'p' : 'o'}`} aria-pressed={modo === 'solo'} onClick={() => trocarModo('solo')}>1 jogador</button>
           <button className={`btn mini ${modo === 'dois' ? 'p' : 'o'}`} aria-pressed={modo === 'dois'} onClick={() => trocarModo('dois')}>{rotuloDois}</button>
         </span>}
-        {!partida && jogo.online && <button className="btn ouro mini" onClick={() => setChamar(jogo.id)}>👋 Chamar amigo</button>}
+        {!partida && <button className="btn ouro mini" onClick={() => setChamar(jogo.id)}>👋 Chamar amigo</button>}
       </div>
       {chamar && !partida && <ChamarAmigo jogoInicial={chamar} aoCriar={abrirSala} fechar={() => setChamar(null)} />}
       {partida && espera && <p className="msg ok" role="status">Convite enviado para {partida.nome}. A sala abre quando ele aceitar (vale por 10 minutos).</p>}
