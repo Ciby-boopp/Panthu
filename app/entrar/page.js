@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import Logo from '@/components/Logo';
@@ -24,6 +24,13 @@ export default function Entrar() {
   const [msg, setMsg] = useState(null);
   const [carregando, setC] = useState(false);
   const router = useRouter();
+  // Link de indicação (?ref=CODIGO): guarda o código para usar depois do cadastro.
+  useEffect(() => {
+    try {
+      const r = new URLSearchParams(location.search).get('ref');
+      if (r) { localStorage.setItem('panthu_ref', r.trim().toUpperCase().slice(0, 12)); setModo('cadastro'); }
+    } catch {}
+  }, []);
 
   async function enviar(e) {
     e.preventDefault(); setC(true); setMsg(null);

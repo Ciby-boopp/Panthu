@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { criarServidor } from '@/lib/supabase/server';
 import Sala from '@/components/Sala';
 import CabecalhoSala from '@/components/chat/CabecalhoSala';
+import { favoritosDe } from '@/lib/favoritos';
 export const dynamic = 'force-dynamic';
 
 export default async function SalaPage({ params }) {
@@ -14,8 +15,9 @@ export default async function SalaPage({ params }) {
   if (!titulo) { const { data: t } = await sb.rpc('titulo_sala', { sl: id }); titulo = t; }
   if (!titulo) notFound();
   const { data: msgs } = await sb.rpc('mensagens_sala', { sl: id, limite: 100 });
+  const favs = await favoritosDe(sb, user.id, 'grupo');
   return (<>
-    <CabecalhoSala titulo={titulo} tipo={sala.tipo} />
+    <CabecalhoSala titulo={titulo} tipo={sala.tipo} salaId={id} favorito={favs.has(String(id))} />
     <Sala salaId={id} usuarioId={user.id} inicial={msgs || []} />
   </>);
 }

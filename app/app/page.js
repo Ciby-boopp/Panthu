@@ -1,6 +1,7 @@
 import { criarServidor } from '@/lib/supabase/server';
 import EventosLista from '@/components/EventosLista';
 import SubAbas from '@/components/SubAbas';
+import { favoritosDe } from '@/lib/favoritos';
 export const dynamic = 'force-dynamic';
 const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Sao_Paulo' });
 
@@ -24,12 +25,15 @@ export default async function Eventos({ searchParams }) {
   const { data: eventos } = await consulta;
   const { data: minhas } = await sb.from('confirmacoes').select('evento_id').eq('usuario_id', user.id).in('status', ['confirmado', 'presente']);
   const meus = new Set((minhas || []).map(c => c.evento_id));
+  const favs = await favoritosDe(sb, user.id, 'evento');
   const base = (eventos || []).filter(e => aba !== 'minhas' || meus.has(e.id));
   const totais = await Promise.all(base.map(async e => (await sb.rpc('total_confirmados', { ev: e.id })).data || 0));
   const itens = base.map((e, i) => ({
     id: e.id, nome: e.nome, quando: quando(e.inicio), banner_url: e.banner_url, capacidade: e.capacidade,
     local: e.estabelecimentos?.nome || 'Local a definir', logo_url: e.estabelecimentos?.logo_url || null,
-    total: totais[i], confirmado: meus.has(e.id)
+    total: totais[i], confirmado: meus.has(e.id), favorito: favs.has(String(e.id)),
+    dia: new Date(e.inicio).toLocaleDateString('pt-BR', { day: '2-digit', timeZone: 'America/Sao_Paulo' }),
+    mes: new Date(e.inicio).toLocaleDateString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '')
   }));
   return (<div className="pag-larga">
     <h1 style={{ fontSize: 32 }}>Oi, {perfil?.nome?.split(' ')[0]}!</h1>

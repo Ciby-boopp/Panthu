@@ -6,7 +6,7 @@ import Icone from '@/components/Icone';
 // Só entram aqui páginas que existem e funcionam. Cada módulo novo é adicionado quando fica pronto.
 const GRUPOS = [
   ['Visão geral', [['/admin', 'Painel', 'adm'], ['/admin/conexoes', 'Conexões', 'usuarios']]],
-  ['Operação', [['/admin/usuarios', 'Usuários', 'perfil'], ['/admin/eventos', 'Eventos', 'eventos'], ['/admin/estabelecimentos', 'Estabelecimentos', 'local'], ['/admin/avaliacoes', 'Avaliações', 'check']]],
+  ['Operação', [['/admin/usuarios', 'Usuários', 'perfil'], ['/admin/eventos', 'Eventos', 'eventos'], ['/admin/estabelecimentos', 'Estabelecimentos', 'local'], ['/admin/avaliacoes', 'Avaliações', 'check'], ['/admin/pontos', 'Pontos e brindes', 'jogos']]],
   ['Segurança', [['/admin/denuncias', 'Denúncias', 'alerta'], ['/admin/auditoria', 'Auditoria', 'busca']]]
 ];
 

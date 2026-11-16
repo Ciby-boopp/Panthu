@@ -4,5 +4,5 @@ export default async function Layout({ children }) {
   const sb = await criarServidor();
   const { data: { user } } = await sb.auth.getUser();
   const { data: p } = await sb.from('perfis').select('papel').eq('id', user.id).single();
-  return (<><Topo papel={p?.papel} /><main>{children}</main></>);
+  return (<><Topo papel={p?.papel} /><main id="conteudo" tabIndex={-1}>{children}</main></>);
 }

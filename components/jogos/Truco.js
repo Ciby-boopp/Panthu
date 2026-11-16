@@ -5,18 +5,18 @@ import { criarCliente } from '@/lib/supabase/client';
 import { idCarta } from '@/lib/cartas';
 import { NOME_AUMENTO, PROX, aplicar, decidirIA, manilhaDe, novoJogo, visao } from '@/lib/truco';
 
-export default function Truco({ modo, aoTerminar }) {
-  return modo === 'solo' ? <TrucoSolo aoTerminar={aoTerminar} /> : <TrucoOnline aoTerminar={aoTerminar} />;
+export default function Truco({ modo, aoTerminar, auto }) {
+  return modo === 'solo' && !auto ? <TrucoSolo aoTerminar={aoTerminar} /> : <TrucoOnline aoTerminar={aoTerminar} auto={auto} />;
 }
 
 // Avisa o painel (uma vez) quando a partida acaba.
-function useFimDeJogo(s, seat, aoTerminar) {
+function useFimDeJogo(s, seat, aoTerminar, extra = {}) {
   const enviado = useRef(false);
   useEffect(() => {
     if (!s || s.fase !== 'fimJogo' || enviado.current) return;
     enviado.current = true;
     const venceu = s.vencedorMao === seat;
-    aoTerminar?.({ pontos: venceu ? 12 : s.placar[seat], vitoria: venceu, detalhes: { placar: s.placar } });
+    aoTerminar?.({ pontos: venceu ? 12 : s.placar[seat], vitoria: venceu, detalhes: { placar: s.placar, ...extra } });
   }, [s, seat, aoTerminar]);
   return enviado;
 }
@@ -33,7 +33,7 @@ function TrucoSolo({ aoTerminar }) {
   return <MesaTruco s={s} seat={0} agir={agir} nomes={['Você', 'Computador']} onNovo={() => { enviado.current = false; setS(novoJogo()); }} />;
 }
 
-function TrucoOnline({ aoTerminar }) {
+function TrucoOnline({ aoTerminar, auto }) {
   const [etapa, setEtapa] = useState('menu'); // menu | esperando | jogando
   const [codigo, setCodigo] = useState('');
   const [entrada, setEntrada] = useState('');
@@ -42,7 +42,7 @@ function TrucoOnline({ aoTerminar }) {
   const sRef = useRef(null);
   const canal = useRef(null);
   const sb = useRef(null);
-  const enviado = useFimDeJogo(s, seat ?? 0, aoTerminar);
+  const enviado = useFimDeJogo(s, seat ?? 0, aoTerminar, { online: true });
 
   useEffect(() => () => { if (canal.current && sb.current) sb.current.removeChannel(canal.current); }, []);
 
@@ -69,6 +69,8 @@ function TrucoOnline({ aoTerminar }) {
       else { setEtapa('esperando'); ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); }
     });
   };
+  // Partida combinada por convite: entra direto na sala, sem digitar código.
+  useEffect(() => { if (auto) { sRef.current = null; conectar(auto.sala, auto.seat); } }, [auto?.sala, auto?.seat]); // eslint-disable-line react-hooks/exhaustive-deps
   // O convidado repete o aviso até receber o estado (caso o anfitrião ainda não estivesse pronto).
   useEffect(() => {
     if (seat !== 1 || etapa !== 'esperando') return;

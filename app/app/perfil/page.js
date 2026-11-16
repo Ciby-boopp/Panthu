@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import PerfilForm from '@/components/PerfilForm';
 import NotificacoesPush from '@/components/NotificacoesPush';
+import BoasVindas from '@/components/BoasVindas';
+import Acessibilidade from '@/components/Acessibilidade';
+import MeusDados from '@/components/MeusDados';
 import { quando } from '@/lib/util';
 import '@/components/chat.css';
 export const dynamic = 'force-dynamic';
@@ -10,13 +13,24 @@ export default async function Perfil() {
   const sb = await criarServidor();
   const { data: { user } } = await sb.auth.getUser();
   const { data: perfil } = await sb.from('perfis').select('id, nome, telefone, email, foto_url, bio').eq('id', user.id).single();
+  const { data: extra } = await sb.from('perfis').select('cidade, interesses, hobbies, procura').eq('id', user.id).single();
+  const { data: resumo } = await sb.rpc('pontos_resumo');
+  const pts = resumo?.[0];
   const { data: hist } = await sb.from('confirmacoes').select('status, eventos(id, nome, inicio)').eq('usuario_id', user.id).order('criado_em', { ascending: false });
   return (<>
     <h1 style={{ fontSize: 32 }}>Meu perfil</h1>
     <p><Link href={`/app/pessoa/${user.id}`}>Ver como os outros me veem</Link></p>
-    <p><Link className="btn s mini" href="/app/amigos">Meus amigos</Link></p>
+    <p className="j-acoes" style={{ justifyContent: 'flex-start' }}>
+      <Link className="btn s mini" href="/app/amigos">Meus amigos</Link>
+      <Link className="btn s mini" href="/app/favoritos">Favoritos</Link>
+      <Link className="btn s mini" href="/app/convidar">Convidar amigos</Link>
+      <Link className="btn ouro mini" href="/app/pontos">{pts ? `${pts.total} pontos` : 'Meus pontos'}</Link>
+    </p>
     <PerfilForm perfil={perfil} />
+    {extra && <BoasVindas perfil={{ id: user.id, ...extra }} editar />}
     <NotificacoesPush />
+    <Acessibilidade />
+    <MeusDados />
     <div className="card"><h3>Meu histórico</h3>
       {(!hist || !hist.length) && <p style={{ color: 'var(--suave)' }}>Você ainda não confirmou presença em nenhum encontro.</p>}
       {(hist || []).filter(h => h.eventos).map((h, i) => (

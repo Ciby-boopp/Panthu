@@ -61,6 +61,15 @@ export default function useChatAviso(path) {
           const novo = lista?.[0];
           setAviso({ id: Date.now(), titulo: 'Pedido para conversar', hora: hora(), texto: novo ? `${novo.nome} quer conversar com você` : 'Você recebeu um pedido', href: '/app/chat' });
         })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jogos_convites', filter: `para=eq.${user.id}` }, async (p) => {
+          const c = p.new;
+          const { data: v } = await getSb().rpc('ver_convite', { p_id: c.id });
+          const nome = v?.[0]?.de_nome || 'Um amigo';
+          setAviso({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${c.jogo === 'memoria' ? 'Memória' : 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pontos_cupons', filter: `usuario_id=eq.${user.id}` }, () => {
+          setAviso({ id: Date.now(), titulo: 'Você ganhou um brinde! 🎁', hora: hora(), texto: 'Seu cupom de brinde já está disponível.', href: '/app/pontos' });
+        })
         .subscribe();
     })();
     const voltou = () => { if (document.visibilityState === 'visible') carregar(); };

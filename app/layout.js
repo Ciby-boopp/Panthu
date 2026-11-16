@@ -7,7 +7,8 @@ export const viewport = { width: 'device-width', initialScale: 1, viewportFit: '
 export default function Layout({ children }) {
   return (
     <html lang="pt-BR">
-      <body className={`${titulo.variable} ${texto.variable}`}>{children}</body>
+      <head><script dangerouslySetInnerHTML={{ __html: "try{var a=JSON.parse(localStorage.getItem('panthu_acess')||'null');if(a){var h=document.documentElement;h.dataset.texto=a.texto||'normal';h.dataset.contraste=a.contraste||'normal';h.dataset.movimento=a.movimento||'normal'}}catch(e){}" }} /></head>
+      <body className={`${titulo.variable} ${texto.variable}`}><a href="#conteudo" className="pular">Pular para o conteúdo</a>{children}</body>
     </html>
   );
 }
