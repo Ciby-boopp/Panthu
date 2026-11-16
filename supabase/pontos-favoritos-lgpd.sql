@@ -53,6 +53,16 @@ end $$;
 drop trigger if exists trg_proteger_perfis_extra on public.perfis;
 create trigger trg_proteger_perfis_extra before update on public.perfis for each row execute function public.proteger_perfis_extra();
 
+-- Se já existir uma tabela com o mesmo nome mas com outras colunas (de uma versão antiga), ela é guardada com o sufixo _antiga.
+do $$ declare t record; begin
+  for t in select * from (values ('pontos_regras', 'nome'), ('pontos_lancamentos', 'regra'), ('pontos_brindes', 'meta'), ('pontos_cupons', 'codigo')) v(tabela, coluna) loop
+    if to_regclass('public.' || t.tabela) is not null
+       and not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = t.tabela and column_name = t.coluna) then
+      execute format('alter table public.%I rename to %I', t.tabela, t.tabela || '_antiga');
+    end if;
+  end loop;
+end $$;
+
 -- ===== 2. Pontos (regras editáveis pelo admin), brindes e cupons =====
 create table if not exists public.pontos_regras (
   codigo text primary key,
