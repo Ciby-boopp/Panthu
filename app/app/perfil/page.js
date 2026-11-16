@@ -36,6 +36,7 @@ export default async function Perfil() {
       <Link href="/app/amigos"><Icone nome="usuarios" />Meus amigos</Link>
       <Link href="/app/pontos"><Icone nome="jogos" />Meus pontos e brindes</Link>
       <Link href="/app/convidar"><Icone nome="enviar" />Convidar amigos</Link>
+      <Link href="/app/suporte"><Icone nome="chat" />Fale com o suporte</Link>
       <Link href={`/app/pessoa/${user.id}`}><Icone nome="busca" />Ver como os outros me veem</Link>
     </nav>
     <div id="editar" />

@@ -289,3 +289,4 @@ body{background:radial-gradient(1000px 500px at 50% -10%,#1f3a2a,transparent),va
 .adm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
 .adm-tile{display:grid;justify-items:center;gap:8px;padding:18px 8px;border-radius:16px;border:1px solid #44583A;background:linear-gradient(180deg,#203528,#1B2E22);color:var(--texto);text-decoration:none;font-weight:600}
 .adm-tile .ico{width:30px;height:30px;color:var(--ouro)}
+.aviso-geral{background:linear-gradient(180deg,#E3B872,#CC9B50);color:#101C15;font-weight:700;text-align:center;padding:10px 16px;font-size:14px}
