@@ -4,8 +4,8 @@ import Link from 'next/link';
 import Icone from './Icone';
 import FavoritoBotao from './FavoritoBotao';
 /* eslint-disable @next/next/no-img-element */
-export default function EventosLista({ eventos, vazio }) {
-  const [q, setQ] = useState('');
+export default function EventosLista({ eventos, vazio, inicial = '' }) {
+  const [q, setQ] = useState(inicial);
   const termo = q.trim().toLowerCase();
   const lista = eventos.filter(e => !termo || `${e.nome} ${e.local}`.toLowerCase().includes(termo));
   return (<>
@@ -14,27 +14,23 @@ export default function EventosLista({ eventos, vazio }) {
       <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar encontro ou local" aria-label="Buscar encontro ou local" />
     </div>
     {lista.length === 0 && <div className="card vazio"><h3>{eventos.length === 0 ? vazio.titulo : 'Nenhum encontro encontrado'}</h3><p>{eventos.length === 0 ? vazio.texto : 'Tente outro nome ou limpe a busca.'}</p></div>}
-    <div className="grade-eventos">
+    <div className="ev-lista">
       {lista.map(e => (
-        <Link key={e.id} href={`/app/evento/${e.id}`}>
-          <div className="card evento">
-            <div className="banner">
-              {e.banner_url && <img className="capa" src={e.banner_url} alt="" />}
-              <span className="selo-data" aria-hidden="true"><b>{e.dia}</b><small>{e.mes}</small></span>
-              <span className="fav-canto"><FavoritoBotao tipo="evento" id={e.id} inicial={e.favorito} compacto rotulo={e.nome} /></span>
-              <h3 style={{ marginTop: 34 }}>{e.nome}</h3><div>{e.quando}</div>
-              <div className="local">
-                <div className="logo-local">{e.logo_url ? <img src={e.logo_url} alt="" /> : 'logo'}</div>
-                <b>{e.local}</b>
-              </div>
+        <div className="ev-card" key={e.id}>
+          <Link href={`/app/evento/${e.id}`} className="ev-link" aria-label={`${e.nome}, ${e.quando}`}>
+            <div className="ev-thumb">
+              {e.banner_url ? <img src={e.banner_url} alt="" /> : <span className="ev-sem">{e.logo_url ? <img src={e.logo_url} alt="" /> : '🎉'}</span>}
+              <span className="selo-data" aria-hidden="true"><small>{e.mes}</small><b>{e.dia}</b></span>
             </div>
-            <div className="corpo">
-              <div>{e.confirmado && <span className="tag ok">Presença confirmada</span>}
-                <span className="tag">{e.total}{e.capacidade ? ` de ${e.capacidade}` : ''} confirmados</span></div>
-              {e.capacidade && <div className="barra"><i style={{ width: `${Math.min(100, (e.total / e.capacidade) * 100)}%` }} /></div>}
+            <div className="ev-info">
+              <h3>{e.nome}</h3>
+              <span className="ev-linha"><Icone nome="local" />{e.local}</span>
+              <span className="ev-linha"><Icone nome="eventos" />{e.hora}{e.confirmado && <span className="tag ok" style={{ margin: '0 0 0 8px' }}>Você vai!</span>}</span>
+              <span className="ev-linha"><Icone nome="usuarios" />{e.total}{e.capacidade ? ` de ${e.capacidade}` : ''} confirmados</span>
             </div>
-          </div>
-        </Link>
+          </Link>
+          <span className="ev-fav"><FavoritoBotao tipo="evento" id={e.id} inicial={e.favorito} compacto rotulo={e.nome} /></span>
+        </div>
       ))}
     </div>
   </>);

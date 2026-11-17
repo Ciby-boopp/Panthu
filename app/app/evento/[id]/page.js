@@ -36,7 +36,7 @@ export default async function Evento({ params }) {
 
   return (<>
     {confirmado && <AtualizarSozinho segundos={20} />}
-    <p><Link href="/app">← Eventos</Link></p>
+    <p><Link href="/app/eventos">← Eventos</Link></p>
     <div className="card evento">
       <div className="banner">
         {e.banner_url && <img className="capa" src={e.banner_url} alt="" />}
