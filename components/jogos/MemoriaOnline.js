@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import Carta from './Carta';
+import CartaFigura from './CartaFigura';
 import { criarCliente } from '@/lib/supabase/client';
 import { combina, novaMemoria, resolver, virar, visao } from '@/lib/memoria';
 
@@ -73,7 +73,7 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
         <span><span className="tag ok">Você: {s.pares[seat]}</span><span className="tag">Amigo: {s.pares[op]}</span></span>
       </div>
       <div className="j-memoria" style={{ '--cols': cols }}>
-        {s.cartas.map((c, i) => <Carta key={c.id} c={c.f} baixo={!c.f} largura="100%" sel={c.achada} onClick={() => clicar(i)} desabilitada={c.achada || !minhaVez} />)}
+        {s.cartas.map((c, i) => <CartaFigura key={c.id} f={c.f} baixo={!c.f} largura="100%" sel={c.achada} onClick={() => clicar(i)} desabilitada={c.achada || !minhaVez} />)}
       </div>
       {s.fase === 'fim' && <p role="status" className="j-final">{placar}</p>}
       <p className="j-dica">Se o amigo fechar o app durante a partida, ela termina.</p>

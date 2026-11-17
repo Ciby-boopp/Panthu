@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
+import GritoTruco from './GritoTruco';
 import { criarCliente } from '@/lib/supabase/client';
 import { idCarta } from '@/lib/cartas';
 import { NOME_AUMENTO, PROX, aplicar, decidirIA, manilhaDe, novoJogo, visao } from '@/lib/truco';
@@ -112,6 +113,21 @@ function TrucoOnline({ aoTerminar, auto }) {
 
 function MesaTruco({ s, seat, agir, nomes, onNovo }) {
   const op = 1 - seat;
+  const [grito, setGrito] = useState(null);
+  const ant = useRef(null);
+  const [mudo, setMudo] = useState(false);
+  useEffect(() => { try { setMudo(localStorage.getItem('panthu_grito_mudo') === '1'); } catch {} }, []);
+  // Detecta o que acabou de acontecer na mesa e mostra a tela do grito (truco, quero ou correu).
+  useEffect(() => {
+    const a = ant.current; ant.current = s;
+    if (s.pedido && (!a || !a.pedido || a.pedido.para !== s.pedido.para || a.n !== s.n)) {
+      setGrito({ id: `${s.n}-${s.pedido.de}-${s.pedido.para}-${Date.now()}`, texto: NOME_AUMENTO[s.pedido.para].toUpperCase(), quem: s.pedido.de === seat ? 'Você gritou!' : `${nomes[s.pedido.de]} gritou!`, tipo: 'truco' });
+    } else if (a && a.pedido && !s.pedido && s.fase === 'jogando' && s.valor > a.valor) {
+      setGrito({ id: `q-${Date.now()}`, texto: 'QUERO!', quem: a.pedido.de === seat ? `${nomes[1 - seat]} aceitou` : 'Você aceitou', tipo: 'quero' });
+    } else if (a && a.fase === 'jogando' && s.fase !== 'jogando' && s.motivo === 'correu') {
+      setGrito({ id: `c-${Date.now()}`, texto: 'CORREU!', quem: s.vencedorMao === seat ? `${nomes[1 - seat]} correu` : 'Você correu', tipo: 'correu' });
+    }
+  }, [s]); // eslint-disable-line react-hooks/exhaustive-deps
   const jogando = s.fase === 'jogando';
   const minhaVez = jogando && !s.pedido && s.vez === seat;
   const pedidoParaMim = jogando && s.pedido && s.pedido.de !== seat;
@@ -128,6 +144,7 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
   const rotuloVaza = (k) => (s.res[k] === undefined ? '' : s.res[k] === 'e' ? 'Empate' : s.res[k] === seat ? 'Sua' : 'Dele');
   return (
     <div className="j-mesa">
+      <GritoTruco grito={grito} />
       <div className="j-placar">
         <div><small>{nomes[op]}</small><b>{s.placar[op]}</b></div>
         <div className="j-valor">Mão {s.n} · vale <b>{s.valor}</b></div>
@@ -150,18 +167,19 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
       <p className="j-status" role="status">{status}</p>
       <div className="j-acoes">
         {pedidoParaMim && <>
-          <button className="btn p" onClick={() => agir({ t: 'aceitar' })}>Aceitar</button>
-          <button className="btn perigo" onClick={() => agir({ t: 'correr' })}>Correr</button>
-          {s.pedido.para < 12 && <button className="btn ouro" onClick={() => agir({ t: 'aumentar' })}>{NOME_AUMENTO[PROX[s.pedido.para]]}</button>}
+          <button className="btn p" onClick={() => agir({ t: 'aceitar' })}>Quero!</button>
+          <button className="btn perigo" onClick={() => agir({ t: 'correr' })}>Correr 🏃</button>
+          {s.pedido.para < 12 && <button className="btn ouro grita" onClick={() => agir({ t: 'aumentar' })}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.pedido.para]].toUpperCase()}</button>}
         </>}
-        {podeTruco && <button className="btn ouro" onClick={() => agir({ t: 'truco' })}>{NOME_AUMENTO[PROX[s.valor]]}</button>}
+        {podeTruco && <button className="btn ouro grita" onClick={() => agir({ t: 'truco' })}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.valor]].toUpperCase()}</button>}
         {s.fase === 'fimMao' && <button className="btn p" onClick={() => agir({ t: 'proxima' })}>Próxima mão</button>}
         {s.fase === 'fimJogo' && onNovo && <button className="btn p" onClick={onNovo}>Jogar de novo</button>}
       </div>
       <div className="j-mao" aria-label="Suas cartas">
         {s.maos[seat].map((c, i) => <Carta key={idCarta(c)} c={c} largura="76px" onClick={() => agir({ t: 'jogar', i })} desabilitada={!minhaVez} />)}
       </div>
-      <p className="j-dica">Truco paulista: manilhas são a carta depois do vira (♣ zap &gt; ♥ &gt; ♠ &gt; ♦). Ganha a mão quem fizer 2 vazas. Vale 1 ponto, e sobe para 3, 6, 9 e 12. Primeiro a chegar em 12 vence.</p>
+      <label className="j-dica" style={{ display: 'block' }}><input type="checkbox" checked={!mudo} onChange={(e) => { setMudo(!e.target.checked); try { localStorage.setItem('panthu_grito_mudo', e.target.checked ? '0' : '1'); } catch {} }} />Grito em voz alta (som)</label>
+      <p className="j-dica">Truco paulista: manilhas são a carta depois do vira (♣ zap &gt; ♥ &gt; ♠ &gt; ♦). Ganha a mão quem fizer 2 vazas. Vale 1 ponto, e sobe para 3, 6, 9 e 12. Se você não quiser aceitar, pode correr: quem pediu leva os pontos da rodada anterior. Mão de onze vale 3 e não tem truco. Primeiro a chegar em 12 vence.</p>
     </div>
   );
 }

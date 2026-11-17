@@ -200,3 +200,37 @@ html[data-movimento=reduzido] *,html[data-movimento=reduzido] *::before,html[dat
 .rank-pos{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--verde-s);color:var(--verde-t);font-weight:700;margin-right:10px}
 .rank-pos.top{background:var(--ouro);color:#14211E}
 .convite{border-left:4px solid var(--ouro)}
+/* ---------- xadrez ---------- */
+.xz-tab{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,480px);margin:0 auto;border:3px solid var(--ouro);border-radius:10px;overflow:hidden;aspect-ratio:1}
+.xz-casa{position:relative;border:0;padding:0;margin:0;display:grid;place-items:center;cursor:pointer;font-size:clamp(22px,7.5vw,44px);line-height:1;min-width:0}
+.xz-casa.cla{background:#E8DDB8}.xz-casa.esc{background:#6F9A5E}
+.xz-casa.ult{box-shadow:inset 0 0 0 100px rgba(212,166,96,.35)}
+.xz-casa.sel{box-shadow:inset 0 0 0 4px var(--ouro)}
+.xz-casa.xeque{box-shadow:inset 0 0 0 100px rgba(200,38,78,.55)}
+.xz-casa.alvo::after{content:'';width:30%;height:30%;border-radius:50%;background:rgba(16,28,21,.45);position:absolute}
+.xz-peca.b{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 1px 3px #000}.xz-peca.p{color:#111;text-shadow:0 0 1px rgba(255,255,255,.5)}
+/* ---------- caça-palavras ---------- */
+.cp-grade{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:2px;width:min(100%,460px);margin:0 auto}
+.cp-cel{aspect-ratio:1;border:0;border-radius:6px;background:var(--card);color:var(--texto);font:700 clamp(12px,3.8vw,19px) var(--f-titulo),sans-serif;padding:0;cursor:pointer;min-width:0}
+.cp-cel.ok{background:var(--verde);color:#fff}.cp-cel.ini{background:var(--ouro);color:#14211E}
+.cp-lista{display:flex;flex-wrap:wrap;justify-content:center;gap:2px}.cp-feita{text-decoration:line-through}
+/* ---------- grito do truco ---------- */
+.grito{position:fixed;inset:0;z-index:80;display:grid;place-content:center;justify-items:center;background:rgba(10,18,13,.78);pointer-events:none;animation:gritoEntra .18s ease-out}
+.grito-svg{width:min(78vw,340px)}
+.grito-estrela{fill:var(--ouro);animation:gritoPulsa .5s ease-in-out infinite alternate}
+.grito-soco{animation:gritoSoco .35s ease-in both;transform-origin:160px 120px}
+.grito-ondas{animation:gritoPulsa .35s ease-in-out infinite alternate}
+.grito-texto{font:700 clamp(46px,16vw,96px) var(--f-titulo),sans-serif;color:#fff;text-shadow:0 4px 0 #8C1D3A,0 0 24px rgba(212,166,96,.9);letter-spacing:.02em;animation:gritoTreme .12s linear infinite;margin-top:-6px}
+.grito-quem{color:var(--ouro);font-weight:700;margin-top:4px}
+.grito-quero .grito-texto{text-shadow:0 4px 0 #1F5A2B,0 0 24px rgba(141,179,107,.9)}
+.grito-correu .grito-texto{text-shadow:0 4px 0 #444,0 0 24px rgba(180,194,182,.8)}
+@keyframes gritoEntra{from{opacity:0}to{opacity:1}}
+@keyframes gritoPulsa{from{transform:scale(.96)}to{transform:scale(1.05)}}
+@keyframes gritoSoco{0%{transform:translateY(-60px) scale(1.2)}60%{transform:translateY(8px) scale(.96)}100%{transform:none}}
+@keyframes gritoTreme{0%{transform:translate(0,0) rotate(-1deg)}50%{transform:translate(3px,-3px) rotate(1deg)}100%{transform:translate(-3px,2px) rotate(-1deg)}}
+.btn.grita{font-size:19px;padding:14px 26px;animation:gritoPulsa .8s ease-in-out infinite alternate}
+html[data-movimento=reduzido] .grito-texto,html[data-movimento=reduzido] .btn.grita{animation:none!important}
+.j-icone{display:grid;place-items:center;width:64px;height:64px;border-radius:16px;background:var(--verde-s);color:var(--ouro);flex:none}
+.carta.fig{aspect-ratio:1;border-radius:14%;overflow:hidden;background:#0F1F16;border:2px solid var(--ouro)}
+.carta.fig img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.carta.fig.verso-logo{background:#0F1F16 url('/memoria/00.jpg') center/cover no-repeat}

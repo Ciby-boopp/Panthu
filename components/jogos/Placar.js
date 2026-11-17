@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
 
-const MODO = { solo: '1 jogador', dois: '2 jogadores' };
+const MODO = { solo: '1 jogador', dois: '2 jogadores (online)' };
 
 export default function Placar({ jogo, atualizar }) {
   const [rank, setRank] = useState(null);
@@ -23,7 +23,7 @@ export default function Placar({ jogo, atualizar }) {
     return () => { vivo = false; };
   }, [jogo, atualizar]);
 
-  const ehTruco = jogo === 'truco';
+  const ehTruco = jogo === 'truco' || jogo === 'xadrez';
   return (
     <div className="dois" style={{ marginTop: 6 }}>
       <section className="card" aria-label="Ranking">
