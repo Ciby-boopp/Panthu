@@ -33,3 +33,4 @@ main.adm-main{max-width:1280px}
 .linha-rank:last-child{border-bottom:0}
 .tabela-rol{overflow-x:auto}
 .vazio-nota{color:var(--suave);margin:6px 0 0}
+.adm-conteudo .subabas.chips-nav{margin-top:6px}

@@ -1,19 +1,23 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import Carta from './Carta';
-import { baralho, embaralhar, idCarta } from '@/lib/cartas';
+import CartaFigura from './CartaFigura';
+import { SalaMenu } from './SalaDuelo';
+import { FIGURAS } from '@/lib/figuras';
+import { embaralhar } from '@/lib/cartas';
 import MemoriaOnline from './MemoriaOnline';
 
-const NIVEIS = { facil: { pares: 6, cols: 4, nome: 'Fácil' }, medio: { pares: 8, cols: 4, nome: 'Médio' }, dificil: { pares: 10, cols: 5, nome: 'Difícil' } };
+const NIVEIS = { facil: { pares: 6, cols: 4, nome: 'Fácil' }, medio: { pares: 8, cols: 4, nome: 'Médio' }, dificil: { pares: 12, cols: 6, nome: 'Difícil' } };
 
 function montar(pares) {
-  const faces = embaralhar(baralho()).slice(0, pares);
+  const faces = embaralhar(FIGURAS).slice(0, pares);
   return embaralhar([...faces, ...faces]).map((f, id) => ({ id, f, achada: false }));
 }
 
 export default function Memoria({ modo, aoTerminar, auto }) {
   const [nivel, setNivel] = useState(null);
+  const [sala, setSala] = useState(null);
   if (auto) return <MemoriaOnline sala={auto.sala} seat={auto.seat} aoTerminar={aoTerminar} />;
+  if (modo === 'dois') return sala ? <MemoriaOnline sala={sala.c} seat={sala.l} aoTerminar={aoTerminar} /> : <SalaMenu titulo="Memória" aoEscolher={(c, l) => setSala({ c, l })} />;
   if (!nivel) {
     return (
       <div className="j-mesa" style={{ textAlign: 'center' }}>
@@ -63,7 +67,7 @@ function MemoriaJogo({ nivel, modo, aoTerminar, trocar }) {
     setTrava(true);
     setJogadas((j) => j + 1);
     const [a, b] = v;
-    const ok = idCarta(cartas[a].f) === idCarta(cartas[b].f);
+    const ok = cartas[a].f.id === cartas[b].f.id;
     timer.current = setTimeout(() => {
       if (ok) {
         setCartas((cs) => cs.map((x, k) => (k === a || k === b ? { ...x, achada: true } : x)));
@@ -85,7 +89,7 @@ function MemoriaJogo({ nivel, modo, aoTerminar, trocar }) {
       <div className="j-memoria" style={{ '--cols': nivel.cols }}>
         {cartas.map((c, i) => {
           const aberta = c.achada || viradas.includes(i);
-          return <Carta key={c.id} c={c.f} baixo={!aberta} largura="100%" sel={c.achada} onClick={() => clicar(i)} desabilitada={c.achada || fim} />;
+          return <CartaFigura key={c.id} f={c.f} baixo={!aberta} largura="100%" sel={c.achada} onClick={() => clicar(i)} desabilitada={c.achada || fim} />;
         })}
       </div>
       {fim && <p role="status" className="j-final">{n === 1 ? `Parabéns! ${pontos} pontos em ${jogadas} jogadas e ${mm}.` : pares[0] === pares[1] ? `Empate: ${pares[0]} a ${pares[1]}.` : `${nome(pares[0] > pares[1] ? 0 : 1)} venceu: ${pares[0]} a ${pares[1]}.`}</p>}

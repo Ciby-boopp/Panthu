@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import Avatar from '../Avatar';
 import { criarCliente } from '@/lib/supabase/client';
 
-const NOMES = { truco: 'Truco', memoria: 'Memória' };
+const NOMES = { xadrez: 'Xadrez', truco: 'Truco', memoria: 'Memória', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' };
 
 // Escolhe um amigo e manda o convite. Quando o convite é criado, devolve { id, sala, jogo } para o painel abrir a sala.
 export default function ChamarAmigo({ jogoInicial, aoCriar, fechar }) {
   const sb = useRef(null);
   const cli = () => (sb.current ||= criarCliente());
-  const [jogo, setJogo] = useState(jogoInicial || 'truco');
+  const [jogo, setJogo] = useState(jogoInicial || 'xadrez');
   const [lista, setLista] = useState(null);
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState('');

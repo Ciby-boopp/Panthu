@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Icone from '@/components/Icone';
+import { AREAS } from '@/lib/adm';
 import { criarServidor } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,10 @@ export default async function Admin() {
   const saldoMes = Number(r.receitas_mes) - Number(r.despesas_mes);
 
   return (<>
-    <h1 style={{ fontSize: 32 }}>Painel ADM</h1>
+    <header className="adm-topo"><span className="adm-selo">ADM</span><h1>Painel Administrativo</h1><p>Gerencie tudo em um só lugar</p></header>
+    <nav className="adm-tiles" aria-label="Atalhos do painel">
+      {AREAS.filter(([t]) => t !== 'Visão geral').map(([titulo, itens]) => <Link key={titulo} href={itens[0][0]} className="adm-tile"><Icone nome={itens[0][2]} />{titulo}</Link>)}
+    </nav>
     <div className="linha" style={{ justifyContent: 'flex-start' }}>
       <Link className="btn p" href="/admin/eventos/novo">+ Novo evento</Link>
       <Link className="btn s" href="/admin/estabelecimentos/novo">+ Novo estabelecimento</Link>
