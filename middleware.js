@@ -18,7 +18,11 @@ export async function middleware(req) {
   const protegida = ['/app', '/host', '/admin'].some(p => path === p || path.startsWith(p + '/'));
   const ir = (destino) => NextResponse.redirect(new URL(destino, req.url));
   if (protegida) {
-    if (!user) return ir('/entrar');
+    if (!user) {
+      // Tinha login guardado e ele não vale mais (venceu/revogado) → avisa; quem nunca entrou só vai para o login.
+      const tinha = req.cookies.getAll().some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'));
+      return ir(tinha ? '/entrar?sessao=expirada' : '/entrar');
+    }
     // Uma única consulta ao perfil (antes eram duas). Se a coluna onboarding_em ainda não existe, refaz sem ela.
     let { data: p, error: e1 } = await sb.from('perfis').select('papel, ativo, bloqueado, onboarding_em').eq('id', user.id).single();
     let semOnboarding = false;
