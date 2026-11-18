@@ -1,4 +1,5 @@
 'use client';
+import { ligarPresenca } from '@/lib/presencaJogo';
 import { useEffect, useRef, useState } from 'react';
 import CartaFigura from './CartaFigura';
 import { criarCliente } from '@/lib/supabase/client';
@@ -26,14 +27,15 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
     sb.current = criarCliente();
     const ch = sb.current.channel(`memoria-${sala}`, { config: { broadcast: { self: false } } });
     canal.current = ch;
+    const pres = ligarPresenca(sb.current, ch);
     if (seat === 0) {
       ch.on('broadcast', { event: 'entrou' }, () => { if (!sRef.current) sRef.current = novaMemoria(8); publicar(); })
         .on('broadcast', { event: 'acao' }, ({ payload }) => jogar(1, payload.i));
     } else {
       ch.on('broadcast', { event: 'estado' }, ({ payload }) => setS(payload));
     }
-    ch.subscribe((st) => { if (st === 'SUBSCRIBED' && seat === 1) ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); });
-    return () => { clearTimeout(timer.current); sb.current.removeChannel(ch); };
+    ch.subscribe((st) => { if (st === 'SUBSCRIBED') pres.aoInscrever(); if (st === 'SUBSCRIBED' && seat === 1) ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); });
+    return () => { clearTimeout(timer.current); pres.sair(); };
   }, [sala, seat]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Quem entra repete o aviso até receber o tabuleiro.

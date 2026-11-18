@@ -1,4 +1,5 @@
 'use client';
+import { ligarPresenca } from '@/lib/presencaJogo';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
 
@@ -43,13 +44,14 @@ export default function SalaDuelo({ jogo, titulo, auto, novaCfg, children }) {
     sb.current = criarCliente();
     const ch = sb.current.channel(`${jogo}-${sala}`, { config: { broadcast: { self: false } } });
     canal.current = ch;
+    const pres = ligarPresenca(sb.current, ch);
     EVENTOS.forEach((ev) => ch.on('broadcast', { event: ev }, ({ payload }) => {
       if (ev === 'entrou' && seat === 0) { if (!cfgRef.current) cfgRef.current = novaCfg(); setCfg(cfgRef.current); ch.send({ type: 'broadcast', event: 'inicio', payload: { cfg: cfgRef.current } }); }
       else if (ev === 'inicio' && seat === 1) { cfgRef.current = payload.cfg; setCfg(payload.cfg); }
       ouvintes.current[ev]?.forEach((fn) => fn(payload));
     }));
-    ch.subscribe((st) => { if (st === 'SUBSCRIBED' && seat === 1) ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); });
-    return () => { sb.current.removeChannel(ch); canal.current = null; };
+    ch.subscribe((st) => { if (st === 'SUBSCRIBED') pres.aoInscrever(); if (st === 'SUBSCRIBED' && seat === 1) ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); });
+    return () => { pres.sair(); canal.current = null; };
   }, [sala, seat]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

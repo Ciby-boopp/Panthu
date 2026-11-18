@@ -70,3 +70,14 @@ main:has(.chat-shell){max-width:1440px;padding-bottom:18px}
   .linha-msg{max-width:92%}
   .emoji-painel{right:0;grid-template-columns:repeat(8,1fr)}
 }
+
+/* Etapa 3: agrupamento, editar/apagar */
+.linha-msg.junto{margin-top:-5px}
+.bolha.apagada{opacity:.7;font-style:italic}
+.bolha .hora i{font-style:normal}
+.acoes-msg{font-size:12px;margin-top:4px;opacity:.85;text-align:right}
+.acoes-msg .link{opacity:.8}
+.bolha .edita{display:grid;gap:6px;min-width:200px}
+.bolha .edita input{width:100%;color:var(--texto)}
+.card.saida{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.card.saida b{flex:1;min-width:140px}
