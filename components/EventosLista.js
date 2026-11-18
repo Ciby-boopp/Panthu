@@ -19,7 +19,7 @@ export default function EventosLista({ eventos, vazio, inicial = '' }) {
         <div className="ev-card" key={e.id}>
           <Link href={`/app/evento/${e.id}`} className="ev-link" aria-label={`${e.nome}, ${e.quando}`}>
             <div className="ev-thumb">
-              {e.banner_url ? <img src={e.banner_url} alt="" /> : <span className="ev-sem">{e.logo_url ? <img src={e.logo_url} alt="" /> : '🎉'}</span>}
+              {e.banner_url ? <img loading="lazy" decoding="async" src={e.banner_url} alt="" /> : <span className="ev-sem">{e.logo_url ? <img loading="lazy" decoding="async" src={e.logo_url} alt="" /> : '🎉'}</span>}
               <span className="selo-data" aria-hidden="true"><small>{e.mes}</small><b>{e.dia}</b></span>
             </div>
             <div className="ev-info">

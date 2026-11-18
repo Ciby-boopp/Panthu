@@ -91,7 +91,7 @@ export default function Proximo() {
         {eventos.length === 0 && <div className="card vazio"><h3>Nenhum evento por perto</h3><p>Aumente a distância ou mude a categoria. Só aparecem eventos de locais com coordenadas cadastradas.</p></div>}
         <div className="grade-eventos">{eventos.map(e => (
           <Link key={e.id} href={`/app/evento/${e.id}`}>
-            <div className="card evento"><div className="banner">{e.banner_url && <img className="capa" src={e.banner_url} alt="" />}<h3>{e.nome}</h3><div>{quando(e.inicio)}</div></div>
+            <div className="card evento"><div className="banner">{e.banner_url && <img className="capa" loading="lazy" decoding="async" src={e.banner_url} alt="" />}<h3>{e.nome}</h3><div>{quando(e.inicio)}</div></div>
               <div className="corpo"><div><span className="tag ok">{km(e.distancia_km)}</span>{e.categoria && <span className="tag">{e.categoria}</span>}<span className="tag">{e.total} confirmados</span></div>
                 <small>{e.local}{e.endereco ? ` · ${e.endereco}` : ''}</small></div></div>
           </Link>))}</div>

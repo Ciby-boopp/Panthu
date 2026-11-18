@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
 import GritoTruco from './GritoTruco';
 import { criarCliente } from '@/lib/supabase/client';
+import { ligarPresenca } from '@/lib/presencaJogo';
 import { idCarta } from '@/lib/cartas';
 import { NOME_AUMENTO, PROX, aplicar, decidirIA, manilhaDe, novoJogo, visao } from '@/lib/truco';
 
@@ -43,9 +44,10 @@ function TrucoOnline({ aoTerminar, auto }) {
   const sRef = useRef(null);
   const canal = useRef(null);
   const sb = useRef(null);
+  const pres = useRef(null);
   const enviado = useFimDeJogo(s, seat ?? 0, aoTerminar, { online: true });
 
-  useEffect(() => () => { if (canal.current && sb.current) sb.current.removeChannel(canal.current); }, []);
+  useEffect(() => () => { if (pres.current) pres.current.sair(); else if (canal.current && sb.current) sb.current.removeChannel(canal.current); }, []);
 
   const publicar = () => {
     setS(sRef.current); setEtapa('jogando');
@@ -57,6 +59,7 @@ function TrucoOnline({ aoTerminar, auto }) {
     sb.current = criarCliente();
     const ch = sb.current.channel(`truco-${cod}`, { config: { broadcast: { self: false } } });
     canal.current = ch;
+    pres.current = ligarPresenca(sb.current, ch);
     setCodigo(cod); setSeat(lugar);
     if (lugar === 0) {
       ch.on('broadcast', { event: 'entrou' }, () => { if (!sRef.current) sRef.current = novoJogo(); publicar(); })
@@ -66,6 +69,7 @@ function TrucoOnline({ aoTerminar, auto }) {
     }
     ch.subscribe((status) => {
       if (status !== 'SUBSCRIBED') return;
+      pres.current?.aoInscrever();
       if (lugar === 0) setEtapa('esperando');
       else { setEtapa('esperando'); ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); }
     });
