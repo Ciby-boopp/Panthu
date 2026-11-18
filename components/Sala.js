@@ -20,6 +20,8 @@ export default function Sala({ salaId, usuarioId, inicial }) {
   const [marcas, setMarcas] = useState({}); // id -> { editado_em, apagada }
   const [editando, setEditando] = useState(null); // { id, texto }
   const [apagando, setApagando] = useState(null);
+  const msgsRef = useRef(inicial);
+  msgsRef.current = msgs;
   const campo = useRef(null);
   const fim = useRef(null);
   const sb = useRef(criarCliente()).current;
@@ -42,7 +44,15 @@ export default function Sala({ salaId, usuarioId, inicial }) {
 
   useEffect(() => {
     const canal = sb.channel(`sala-${salaId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens', filter: `sala_id=eq.${salaId}` }, recarregar)
+      // Mensagem nova: se já conhecemos o autor (nome e foto), só acrescenta; senão busca a conversa uma vez.
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens', filter: `sala_id=eq.${salaId}` }, (p) => {
+        const n = p.new;
+        if (!n?.id) return recarregar();
+        if (msgsRef.current.some((m) => m.id === n.id)) return;
+        const conhecido = msgsRef.current.find((m) => m.autor_id === n.autor_id);
+        if (!conhecido) return recarregar();
+        setMsgs((l) => (l.some((m) => m.id === n.id) ? l : [...l, { id: n.id, autor_id: n.autor_id, autor_nome: conhecido.autor_nome, autor_foto: conhecido.autor_foto, texto: n.texto, criado_em: n.criado_em }].slice(-200)));
+      })
       // Edição/exclusão de alguém: atualiza só aquela mensagem, sem recarregar a conversa.
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mensagens', filter: `sala_id=eq.${salaId}` }, (p) => {
         const n = p.new; if (!n?.id) return;
@@ -50,8 +60,11 @@ export default function Sala({ salaId, usuarioId, inicial }) {
         setMarcas((a) => ({ ...a, [n.id]: { editado_em: n.editado_em, apagada: !!n.apagada } }));
       })
       .subscribe();
-    const t = setInterval(recarregar, 15000);
-    return () => { sb.removeChannel(canal); clearInterval(t); };
+    // Rede de segurança (a cada 60 s, só com a tela visível) e ao voltar para o app — antes era a cada 15 s.
+    const t = setInterval(() => { if (!document.hidden) recarregar(); }, 60000);
+    const v = () => { if (!document.hidden) recarregar(); };
+    document.addEventListener('visibilitychange', v);
+    return () => { sb.removeChannel(canal); clearInterval(t); document.removeEventListener('visibilitychange', v); };
   }, [sb, salaId, recarregar]);
 
   useEffect(() => { fim.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
