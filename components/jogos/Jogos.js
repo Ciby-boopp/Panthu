@@ -11,6 +11,7 @@ import Paciencia from './Paciencia';
 import Placar from './Placar';
 import ChamarAmigo from './ChamarAmigo';
 import RankingGeral from './RankingGeral';
+import Avatar from '../Avatar';
 import { salvarPartida } from '@/lib/placar';
 import { criarCliente } from '@/lib/supabase/client';
 
@@ -47,6 +48,19 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
     const { data: { user } } = await cli().auth.getUser();
     setRecebidos(det.filter((c) => c && c.para === user.id && !c.expirado));
   }, []);
+  const [saidas, setSaidas] = useState([]);
+  useEffect(() => {
+    const h = (e) => setSaidas((l) => (l.some((x) => x.id === e.detail.id) ? l.map((x) => (x.id === e.detail.id ? e.detail : x)) : [...l, e.detail]));
+    window.addEventListener('panthu:saida', h);
+    return () => window.removeEventListener('panthu:saida', h);
+  }, []);
+  const avisoSaida = saidas.map((x) => (
+    <div key={x.id} className="card convite saida" role="alert" aria-live="assertive">
+      <Avatar url={x.foto} nome={x.nome} tam={40} />
+      <b>{x.voluntario ? `${x.nome} saiu da partida.` : `${x.nome} perdeu a conexão.`}</b>
+      <button className="btn o mini" onClick={() => setSaidas((l) => l.filter((y) => y.id !== x.id))}>Fechar</button>
+    </div>
+  ));
   useEffect(() => { carregarConvites(); }, [carregarConvites, conviteId]);
   // Atualiza a lista de convites enquanto a tela está aberta.
   useEffect(() => { if (partida) return; const t = setInterval(carregarConvites, 8000); return () => clearInterval(t); }, [carregarConvites, partida]);
@@ -87,6 +101,7 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
   if (!jogo) {
     return (
       <>
+        {avisoSaida}
         {recebidos.map((c) => (
           <div className="card convite" key={c.id} role="alert">
             <b>{c.de_nome} te chamou para jogar {NOME[c.jogo]}!</b>
@@ -131,6 +146,7 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
   const rotuloDois = '2 jogadores (online)';
   return (
     <>
+      {avisoSaida}
       <div className="linha" style={{ margin: '12px 0' }}>
         <button className="btn o mini" onClick={sair}>← Jogos</button>
         <h2 style={{ fontSize: 24 }}>{jogo.nome}{partida ? ` com ${partida.nome || 'amigo'}` : ''}</h2>

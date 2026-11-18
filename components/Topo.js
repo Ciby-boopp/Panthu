@@ -9,7 +9,7 @@ import useChatAviso from './useChatAviso';
 import RegistrarAtividade from './RegistrarAtividade';
 
 const ATALHOS = [
-  ['/app/proximo', 'Perto de você', 'local'], ['/app/jogos', 'Jogos', 'jogos'], ['/app/amigos', 'Meus amigos', 'usuarios'],
+  ['/app/perfil', 'Meu perfil', 'perfil'], ['/app/proximo', 'Perto de você', 'local'], ['/app/amigos', 'Meus amigos', 'usuarios'],
   ['/app/favoritos', 'Favoritos', 'check'], ['/app/pontos', 'Meus pontos', 'check'], ['/app/convidar', 'Convidar amigos', 'enviar'],
 ];
 
@@ -21,11 +21,11 @@ export default function Topo({ papel }) {
   const ehInicio = path === '/app';
   const itens = [
     { href: '/app', nome: 'Início', icone: 'host', ativo: ehInicio },
+    { href: '/app/jogos', nome: 'Jogos', icone: 'jogos', ativo: path.startsWith('/app/jogos') },
+    { href: '/app/chat', nome: 'Bate-papo', icone: 'usuarios', ativo: path.startsWith('/app/chat'), badge: true },
     { href: '/app/eventos', nome: 'Eventos', icone: 'eventos', ativo: path.startsWith('/app/eventos') || path.startsWith('/app/evento') },
     { href: '/app/proximo', nome: 'Perto', icone: 'local', ativo: path.startsWith('/app/proximo') || path.startsWith('/app/amigos'), so: 'desk' },
-    { href: '/app/chat', nome: 'Conexões', icone: 'usuarios', ativo: path.startsWith('/app/chat'), badge: true },
-    { href: '/app/jogos', nome: 'Jogos', icone: 'jogos', ativo: path.startsWith('/app/jogos'), so: 'desk' },
-    { href: '/app/perfil', nome: 'Perfil', icone: 'perfil', ativo: path.startsWith('/app/perfil') || path.startsWith('/app/pessoa') },
+    { href: '/app/perfil', nome: 'Perfil', icone: 'perfil', ativo: path.startsWith('/app/perfil') || path.startsWith('/app/pessoa'), so: 'desk' },
     ...(['host', 'admin'].includes(papel) ? [{ href: '/host', nome: 'Host', icone: 'host', ativo: path.startsWith('/host'), so: 'desk' }] : []),
     ...(papel === 'admin' ? [{ href: '/admin', nome: 'ADM', icone: 'adm', ativo: path.startsWith('/admin'), so: 'desk' }] : []),
   ];
