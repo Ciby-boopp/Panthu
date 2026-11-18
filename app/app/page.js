@@ -35,7 +35,7 @@ export default async function Inicio() {
     {lista.length === 0 ? <div className="card vazio">Nenhum encontro marcado ainda. Assim que houver um, ele aparece aqui.</div> : lista.map((e) => (
       <Link key={e.id} href={`/app/evento/${e.id}`} className="ev-card ev-mini" style={{ textDecoration: 'none', color: 'inherit' }}>
         <span className="ev-link">
-          <span className="ev-thumb" style={{ width: 84 }}>{e.banner_url ? <img src={e.banner_url} alt="" /> : <span className="ev-sem">🎉</span>}<span className="selo-data" aria-hidden="true"><small>{mes(e.inicio)}</small><b>{dia(e.inicio)}</b></span></span>
+          <span className="ev-thumb" style={{ width: 84 }}>{e.banner_url ? <img loading="lazy" decoding="async" src={e.banner_url} alt="" /> : <span className="ev-sem">🎉</span>}<span className="selo-data" aria-hidden="true"><small>{mes(e.inicio)}</small><b>{dia(e.inicio)}</b></span></span>
           <span className="ev-info"><h3>{e.nome}</h3><span className="ev-linha"><Icone nome="local" />{e.estabelecimentos?.nome || 'Local a definir'}</span></span>
         </span>
       </Link>

@@ -35,14 +35,14 @@ export default async function Evento({ params }) {
   const mapa = est?.latitude ? `https://www.openstreetmap.org/?mlat=${est.latitude}&mlon=${est.longitude}#map=17/${est.latitude}/${est.longitude}` : null;
 
   return (<>
-    {confirmado && <AtualizarSozinho segundos={20} />}
+    {confirmado && <AtualizarSozinho segundos={45} />}
     <p><Link href="/app/eventos">← Eventos</Link></p>
     <div className="card evento">
       <div className="banner">
-        {e.banner_url && <img className="capa" src={e.banner_url} alt="" />}
+        {e.banner_url && <img className="capa" loading="lazy" decoding="async" src={e.banner_url} alt="" />}
         <h1 style={{ fontSize: 32 }}>{e.nome}</h1><div>{quando(e.inicio)}</div>
         <div className="local">
-          <div className="logo-local">{est?.logo_url ? <img src={est.logo_url} alt={`Logo ${est.nome}`} /> : 'logo'}</div>
+          <div className="logo-local">{est?.logo_url ? <img loading="lazy" decoding="async" src={est.logo_url} alt={`Logo ${est.nome}`} /> : 'logo'}</div>
           <div><b>{est?.nome || 'Local a definir'}</b><br /><small>{est?.endereco}</small></div>
         </div>
       </div>

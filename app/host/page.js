@@ -1,3 +1,4 @@
+import { totaisConfirmados } from '@/lib/totais';
 import Link from 'next/link';
 import Topo from '@/components/Topo';
 import { criarServidor } from '@/lib/supabase/server';
@@ -19,7 +20,7 @@ export default async function Host() {
     if (ids.length) ({ data: eventos } = await sb.from('eventos').select('id, nome, inicio, capacidade, orientacoes, estabelecimentos(nome)').in('id', ids).order('inicio', { ascending: false }));
   }
   eventos = eventos || [];
-  const totais = await Promise.all(eventos.map(async e => (await sb.rpc('total_confirmados', { ev: e.id })).data || 0));
+  const totais = await totaisConfirmados(sb, eventos.map(e => e.id));
   return (<><Topo papel={p.papel} /><main>
     <h1 style={{ fontSize: 32 }}>Área do Host</h1>
     <p><Link className="btn ouro mini" href="/host/cupons">🎁 Conferir cupom de brinde</Link></p>

@@ -9,7 +9,7 @@ export default async function Lista() {
     {(!data || !data.length) && <div className="card vazio"><h3>Nenhum estabelecimento ainda</h3><p>Cadastre o primeiro local parceiro.</p></div>}
     {(data || []).map(e => (
       <Link key={e.id} href={`/admin/estabelecimentos/${e.id}`} className="card lista-item">
-        <div className="logo-local">{e.logo_url ? <img src={e.logo_url} alt="" /> : 'logo'}</div>
+        <div className="logo-local">{e.logo_url ? <img loading="lazy" decoding="async" src={e.logo_url} alt="" /> : 'logo'}</div>
         <div><b>{e.nome}</b>{!e.ativo && <span className="tag" style={{ marginLeft: 8 }}>inativo</span>}<br /><small style={{ color: 'var(--suave)' }}>{e.endereco}</small></div>
       </Link>
     ))}
