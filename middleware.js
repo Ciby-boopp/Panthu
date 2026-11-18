@@ -18,7 +18,11 @@ export async function middleware(req) {
   const protegida = ['/app', '/host', '/admin'].some(p => path === p || path.startsWith(p + '/'));
   const ir = (destino) => NextResponse.redirect(new URL(destino, req.url));
   if (protegida) {
-    if (!user) return ir('/entrar');
+    if (!user) {
+      // Tinha login guardado e ele não vale mais (venceu/revogado) → avisa; quem nunca entrou só vai para o login.
+      const tinha = req.cookies.getAll().some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'));
+      return ir(tinha ? '/entrar?sessao=expirada' : '/entrar');
+    }
     const { data: p } = await sb.from('perfis').select('papel, ativo, bloqueado').eq('id', user.id).single();
     if (!p || !p.ativo || p.bloqueado) return ir('/entrar?erro=acesso');
     if (path.startsWith('/admin') && p.papel !== 'admin') return ir('/app');
