@@ -24,6 +24,20 @@ export default function Entrar() {
   const [msg, setMsg] = useState(null);
   const [carregando, setC] = useState(false);
   const router = useRouter();
+  const [reenviar, setReenviar] = useState('');
+  // Avisos vindos de redirecionamentos (link inválido, sessão expirada, acesso negado).
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(location.search);
+      const avisos = {
+        link: ['erro', 'Este link de confirmação não funcionou (venceu, já foi usado ou foi aberto em outro aparelho). Tente entrar com seu e-mail e senha; se pedir confirmação, reenvie o e-mail.'],
+        link_senha: ['erro', 'Este link de nova senha venceu ou já foi usado. Peça um novo em “Esqueci a senha” e abra o link mais recente.'],
+        acesso: ['erro', 'Sua conta está sem acesso no momento. Fale com o administrador.'],
+      };
+      if (q.get('sessao') === 'expirada') setMsg({ t: 'erro', m: 'Sua sessão expirou. Entre novamente para continuar.' });
+      else if (avisos[q.get('erro')]) { const [t, m] = avisos[q.get('erro')]; setMsg({ t, m }); if (q.get('erro') === 'link_senha') setModo('recuperar'); }
+    } catch {}
+  }, []);
   // Link de indicação (?ref=CODIGO): guarda o código para usar depois do cadastro.
   useEffect(() => {
     try {
@@ -31,6 +45,12 @@ export default function Entrar() {
       if (r) { localStorage.setItem('panthu_ref', r.trim().toUpperCase().slice(0, 12)); setModo('cadastro'); }
     } catch {}
   }, []);
+
+  async function reenviarConfirmacao() {
+    if (!reenviar) return;
+    const { error } = await criarCliente().auth.resend({ type: 'signup', email: reenviar, options: { emailRedirectTo: `${location.origin}/auth/callback?next=/app` } });
+    setMsg(error ? { t: 'erro', m: 'Não foi possível reenviar agora. Aguarde um minuto e tente de novo.' } : { t: 'ok', m: 'Reenviamos o e-mail de confirmação. Veja também a caixa de spam.' });
+  }
 
   async function enviar(e) {
     e.preventDefault(); setC(true); setMsg(null);
@@ -40,19 +60,23 @@ export default function Entrar() {
     const sb = criarCliente();
     if (modo === 'login') {
       const { error } = await sb.auth.signInWithPassword({ email, password: senha });
-      if (error) setMsg({ t: 'erro', m: 'E-mail ou senha incorretos.' });
-      else { router.replace('/app'); router.refresh(); return; }
+      if (error) {
+        if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || '')) { setReenviar(email); setMsg({ t: 'erro', m: 'Seu e-mail ainda não foi confirmado. Abra o e-mail que enviamos e toque no link, ou peça o reenvio abaixo.' }); }
+        else if (error.status === 429) setMsg({ t: 'erro', m: 'Muitas tentativas. Aguarde alguns minutos e tente de novo.' });
+        else if (!navigator.onLine || /fetch|network/i.test(error.message || '')) setMsg({ t: 'erro', m: 'Sem conexão com a internet. Verifique e tente de novo.' });
+        else { setReenviar(''); setMsg({ t: 'erro', m: 'E-mail ou senha incorretos.' }); }
+      } else { router.replace('/app'); router.refresh(); return; }
     } else if (modo === 'cadastro') {
       if (!senhaForte(senha)) { setMsg({ t: 'erro', m: SENHA_REGRA }); setC(false); return; }
       const { data, error } = await sb.auth.signUp({
         email, password: senha,
-        options: { data: { nome: String(f.get('nome')).trim(), telefone: String(f.get('telefone')).trim() } }
+        options: { emailRedirectTo: `${location.origin}/auth/callback?next=/app`, data: { nome: String(f.get('nome')).trim(), telefone: String(f.get('telefone')).trim() } }
       });
       if (error) setMsg({ t: 'erro', m: motivoCadastro(error) });
       else if (data.session) { router.replace('/app'); router.refresh(); return; }
-      else setMsg({ t: 'ok', m: 'Conta criada! Confirme seu e-mail para entrar.' });
+      else setMsg({ t: 'ok', m: 'Conta criada! Enviamos um e-mail de confirmação: abra e toque no link para entrar. Veja também o spam.' });
     } else {
-      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/redefinir` });
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/auth/callback?next=/redefinir` });
       setMsg(error ? { t: 'erro', m: 'Não foi possível enviar o e-mail agora.' } : { t: 'ok', m: 'Se o e-mail existir, enviamos o link para criar uma nova senha.' });
     }
     setC(false);
@@ -71,6 +95,7 @@ export default function Entrar() {
           <div className="campo"><label htmlFor="email">E-mail</label><input id="email" name="email" type="email" required autoComplete="email" /></div>
           {modo !== 'recuperar' && <div className="campo"><label htmlFor="senha">Senha</label><SenhaInput id="senha" forte={modo === 'cadastro'} autoComplete={modo === 'login' ? 'current-password' : 'new-password'} /></div>}
           {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}
+          {reenviar && <button type="button" className="btn" style={{ width: '100%', marginBottom: 10 }} onClick={reenviarConfirmacao}>Reenviar e-mail de confirmação</button>}
           <button className="btn ouro" style={{ width: '100%' }} disabled={carregando}>
             {carregando ? 'Aguarde…' : modo === 'login' ? 'Entrar' : modo === 'cadastro' ? 'Criar conta' : 'Enviar link'}
           </button>
