@@ -7,6 +7,7 @@ import AmigoBotao from '@/components/AmigoBotao';
 import FavoritoBotao from '@/components/FavoritoBotao';
 import { favoritosDe } from '@/lib/favoritos';
 import '@/components/chat.css';
+import { GaleriaVer } from '@/components/GaleriaFotos';
 export const dynamic = 'force-dynamic';
 export default async function Pessoa({ params }) {
   const { id } = await params;
@@ -18,6 +19,7 @@ export default async function Pessoa({ params }) {
   const { data: ep } = p.sou_eu ? { data: null } : await sb.rpc('estado_pedido', { outro: p.id });
   const e = ep?.[0] || { estado: 'nenhum', sala_id: null, pedido_id: null };
   const favs = await favoritosDe(sb, user.id, 'pessoa');
+  const { data: fotos } = await sb.rpc('fotos_pessoa', { p_id: p.id }); // vazio se o SQL da galeria ainda não foi rodado
   return (<>
     <p><Link href="/app/chat">← Voltar</Link></p>
     <div className="card" style={{ textAlign: 'center' }}>
@@ -35,5 +37,6 @@ export default async function Pessoa({ params }) {
             {e.estado === 'nenhum' && !p.mesmo_evento && <p style={{ color: 'var(--suave)', fontSize: 14, margin: 0 }}>Para conversar em particular, a pessoa precisa aceitar o seu pedido.</p>}
           </div>}
     </div>
+    <GaleriaVer fotos={fotos || []} nome={p.nome} />
   </>);
 }

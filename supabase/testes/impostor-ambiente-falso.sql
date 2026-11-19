@@ -1,0 +1,10 @@
+create role anon nologin; create role authenticated nologin;
+create schema auth;
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+create table public.perfis (id uuid primary key, nome text, foto_url text, papel text default 'membro', ativo boolean default true, bloqueado boolean default false);
+create function public.usuario_liberado() returns boolean language sql stable as $$ select true $$;
+create function public.eh_admin() returns boolean language sql stable as $$ select false $$;
+create table public.pontos_lancamentos (u uuid, regra text, ref text);
+create function public.dar_pontos(p_user uuid, p_regra text, p_ref text default null) returns void language sql as $$ insert into public.pontos_lancamentos values (p_user, p_regra, p_ref) $$;
+insert into public.perfis (id, nome) select ('00000000-0000-0000-0000-0000000000' || lpad(i::text,2,'0'))::uuid, 'Jogador' || i from generate_series(1,8) i;
+grant usage on schema public to authenticated; grant usage on schema auth to authenticated;

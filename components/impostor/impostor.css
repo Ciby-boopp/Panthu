@@ -1,0 +1,68 @@
+.imp{display:grid;gap:12px;max-width:640px;margin:0 auto}
+.imp h1{font-size:clamp(24px,7vw,32px);margin:0;color:var(--ouro)}
+.imp h2{font-size:21px;margin:0 0 8px}.imp h3{font-size:17px;margin:0 0 8px}
+.imp-capa{text-align:center;padding:22px 14px;border-radius:var(--raio);border:1.5px solid rgba(212,166,96,.5);background:radial-gradient(600px 220px at 50% 0,#2f6a47,transparent),linear-gradient(180deg,#1d4a32,#14301f)}
+.imp-capa-ico{font-size:54px;display:block;animation:impFlutua 2.6s ease-in-out infinite}
+.imp-capa p{margin:6px auto 0;max-width:420px;color:var(--suave)}
+.imp-botoes{display:grid;gap:10px}
+.imp-botoes .btn,.imp-acoes .btn{width:100%}
+.btn.grande{padding:16px 18px;font-size:18px}
+.imp-codigo{display:grid;grid-template-columns:1fr auto;gap:8px}
+.imp-codigo input{text-align:center;letter-spacing:.25em;font-weight:700;text-transform:uppercase}
+.imp-aviso{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-color:var(--ouro)}
+.imp-form{display:grid;gap:14px}
+.imp-form label{display:grid;gap:6px}
+.imp-form fieldset{border:0;padding:0;margin:0}
+.imp-opcoes{display:flex;gap:8px;flex-wrap:wrap}
+.imp-tempos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{border:1.5px solid var(--borda);background:transparent;color:inherit;border-radius:999px;padding:7px 14px;cursor:pointer}
+.chip.on{background:linear-gradient(180deg,#E3B872,#CC9B50);color:#101C15;border-color:transparent;font-weight:700}
+.imp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.imp-stats div{text-align:center;padding:10px 4px;border:1px solid var(--borda);border-radius:var(--raio-s)}
+.imp-stats b{display:block;font:700 26px var(--f-titulo),sans-serif;color:var(--ouro)}.imp-stats small{font-size:12px}
+.imp-como li{margin-bottom:10px}
+.imp-topo{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.imp-topo small{color:var(--suave)}
+.imp-cod{border:1.5px dashed var(--ouro);background:transparent;color:var(--ouro);border-radius:var(--raio-s);padding:6px 12px;cursor:pointer;display:grid;text-align:center}
+.imp-cod b{font:700 22px var(--f-titulo),sans-serif;letter-spacing:.2em;color:#fff}.imp-cod small{font-size:10px}
+.imp-etapas{display:flex;gap:6px;list-style:none;padding:0;margin:0;overflow-x:auto}
+.imp-etapas li{flex:1;min-width:64px;text-align:center;font-size:12px;padding:6px 2px;border-radius:999px;border:1px solid var(--borda);opacity:.6}
+.imp-etapas li.feito{opacity:.9;border-color:var(--ouro)}.imp-etapas li.atual{opacity:1;background:var(--ouro);color:#101C15;font-weight:700;border-color:var(--ouro)}
+.imp-papel{display:grid;gap:2px;justify-items:center;text-align:center;padding:16px;border-radius:var(--raio);animation:impRevela .8s ease-out}
+.imp-papel strong{font:700 clamp(32px,11vw,52px) var(--f-titulo),sans-serif;line-height:1.1}
+.imp-papel.com{background:linear-gradient(180deg,#1f5a3a,#173f2b);border:1.5px solid var(--ouro)}
+.imp-papel.imp{background:linear-gradient(180deg,#6b1d33,#3d0f1d);border:1.5px solid #ff7a93;box-shadow:0 0 28px rgba(255,90,120,.35)}
+.imp-papel .btn{margin-top:8px}
+.imp-relogio{justify-self:center;font:700 26px var(--f-titulo),sans-serif;padding:6px 20px;border-radius:999px;border:2px solid var(--ouro);color:var(--ouro)}
+.imp-relogio.urgente{color:#fff;background:#b3263e;border-color:#b3263e;animation:impPulsa .5s ease-in-out infinite alternate}
+.imp-lista{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.imp-lista li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.imp-lista li b{flex:1;min-width:90px}
+.imp-av{position:relative;display:inline-block}
+.ponto{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#7b8a80;border:2px solid #14301f}.ponto.on{background:#4ade80}
+.imp-acoes{display:grid;gap:8px;margin-top:10px}
+.imp-amigos{margin-top:10px;display:grid;gap:6px}
+.imp-fichas{display:flex;gap:10px;overflow-x:auto;padding:4px 2px}
+.imp-ficha{display:grid;justify-items:center;gap:2px;min-width:56px;padding:6px;border-radius:12px;border:1.5px solid transparent;position:relative}
+.imp-ficha small{font-size:12px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imp-ficha.fora{opacity:.45;filter:grayscale(1)}.imp-ficha em{position:absolute;top:0;right:2px;font-style:normal}
+.imp-ficha.vez{border-color:var(--ouro);background:rgba(212,166,96,.15);animation:impPulsa .8s ease-in-out infinite alternate}
+.imp-dica-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.imp-dicas p{margin:4px 0}.imp-dicas p.vazia{opacity:.55;font-style:italic}.imp-dicas small{color:var(--ouro)}
+.imp-msgs{max-height:200px;overflow-y:auto;display:grid;gap:4px;padding:8px;border-radius:var(--raio-s);background:rgba(10,18,13,.35)}
+.imp-msgs p{margin:0}.imp-msgs p.eu{color:var(--ouro)}
+.imp-votos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.imp-voto{display:grid;justify-items:center;gap:4px;padding:12px 6px;border:1.5px solid var(--borda);border-radius:var(--raio-s);background:transparent;color:inherit;cursor:pointer}
+.imp-voto:hover,.imp-voto:focus-visible{border-color:var(--ouro);background:rgba(212,166,96,.12)}
+.imp-resultado{text-align:center;animation:impRevela .7s ease-out}.imp-resultado.acerto{border-color:#4ade80}.imp-resultado.erro{border-color:#ff7a93}
+.imp-revela{font:700 24px var(--f-titulo),sans-serif}
+.imp-votos-rev{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px}
+.imp-ultima{text-align:center;border-color:var(--ouro)}
+.imp-fim{text-align:center}.imp-fim.venceu{border-color:var(--ouro);background:radial-gradient(500px 200px at 50% 0,rgba(212,166,96,.28),transparent),var(--card)}
+.imp-fim.perdeu{border-color:#ff7a93}
+.imp-fim-ico{font-size:64px;animation:impFlutua 2s ease-in-out infinite}.imp-pts{font:700 30px var(--f-titulo),sans-serif;color:var(--ouro);margin:0}
+.imp-fim .imp-lista{text-align:left;margin-top:10px}
+.imp-social-item{padding:10px 0;border-bottom:1px solid var(--borda)}.imp-social-item .imp-acoes{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+@keyframes impRevela{0%{transform:scale(.7) rotateX(70deg);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:none}}
+@keyframes impPulsa{to{transform:scale(1.04)}}
+@keyframes impFlutua{50%{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.imp *{animation:none!important}}
