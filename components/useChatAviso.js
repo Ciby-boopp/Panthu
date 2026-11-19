@@ -67,6 +67,10 @@ export default function useChatAviso(path) {
           const nome = v?.[0]?.de_nome || 'Um amigo';
           setAviso({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${({ memoria: 'Memória', xadrez: 'Xadrez', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' })[c.jogo] || 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
         })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'imp_convites', filter: `para=eq.${user.id}` }, (p) => {
+          const c = p.new;
+          avisar({ id: c.id, titulo: 'Convite: Quem é o Impostor?', hora: hora(), texto: `Você foi chamado para “${c.sala_nome || 'uma sala'}”. Toque para entrar!`, href: `/app/impostor?sala=${c.codigo}` });
+        })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jogos_alta' }, (p) => {
           const j = p.new;
           if (!j || window.__panthuJogando === j.jogo) return;

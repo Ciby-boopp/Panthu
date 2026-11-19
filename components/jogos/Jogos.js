@@ -128,6 +128,12 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
             </button>
           ))}
         </div>
+        <Link className="j-tile impostor-tile" href="/app/impostor">
+          <span className="j-icone" aria-hidden="true" style={{ fontSize: 44 }}>🕵️</span>
+          <span>Quem é o Impostor?</span>
+          <small>Novo! De 4 a 20 pessoas. Dê dicas, descubra o impostor e faça amizades.</small>
+          <span className="tag ok" style={{ margin: 0 }}>Salas públicas e privadas</span>
+        </Link>
         <RankingGeral atualizar={atualizar} />
         <details className="card">
           <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Como funciona a disputa entre dois celulares</summary>

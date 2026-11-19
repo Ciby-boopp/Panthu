@@ -307,3 +307,4 @@ body{background:radial-gradient(1000px 500px at 50% -10%,#1f3a2a,transparent),va
 .j-zoeira select{flex:1;min-width:140px}
 .j-zoeira .btn{margin-top:10px}
 @media (prefers-reduced-motion:reduce){.zoeira{display:none}}
+.impostor-tile{margin-top:12px;text-decoration:none;display:grid;border-color:var(--ouro)}
