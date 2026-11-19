@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { gritar, lerPrefs, reduzMovimento } from '@/lib/efeitosTruco';
+import { gritar, lerPrefs, reduzMovimento, vozLigada } from '@/lib/efeitosTruco';
+import { lerGrito, tocarGrito } from '@/lib/gritoGravado';
 
 const ZOEIRA = { truco: ['🦆', '🦆', '🦆'], quero: ['🎉', '🎊', '✨', '🎉'], correu: ['🐔', '💨'] };
 
@@ -8,13 +9,21 @@ const ZOEIRA = { truco: ['🦆', '🦆', '🦆'], quero: ['🎉', '🎊', '✨',
 export function falar(texto, tipo) { gritar(texto, tipo); }
 
 // Tela ilustrada do grito: soco na mesa, balão com o texto e ondas de som. Some sozinha em ~1,8 s.
-export default function GritoTruco({ grito }) {
+export default function GritoTruco({ grito, audioOp }) {
   const [vis, setVis] = useState(null);
   const [anim, setAnim] = useState(false);
   useEffect(() => {
     if (!grito) return;
     setAnim(lerPrefs().anim && !reduzMovimento());
-    setVis(grito); gritar(grito.texto, grito.tipo);
+    setVis(grito);
+    // TRUCO com voz gravada: a minha (se eu gravei) ou a do oponente (se ele mandou). Sem gravação → voz com efeitos.
+    let url = null;
+    if (grito.tipo === 'truco' && vozLigada()) {
+      if (grito.meu) url = lerGrito();
+      else if (audioOp?.current && Date.now() - audioOp.current.t < 8000) { url = audioOp.current.url; audioOp.current = null; }
+    }
+    if (url) tocarGrito(url).then((ok) => { if (!ok) gritar(grito.texto, grito.tipo); });
+    else gritar(grito.texto, grito.tipo);
     const t = setTimeout(() => setVis(null), 1800);
     return () => clearTimeout(t);
   }, [grito?.id]); // eslint-disable-line react-hooks/exhaustive-deps
