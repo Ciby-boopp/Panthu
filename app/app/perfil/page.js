@@ -3,6 +3,7 @@ import Avatar from '@/components/Avatar';
 import Icone from '@/components/Icone';
 import { criarServidor } from '@/lib/supabase/server';
 import PerfilForm from '@/components/PerfilForm';
+import GaleriaFotos from '@/components/GaleriaFotos';
 import NotificacoesPush from '@/components/NotificacoesPush';
 import BoasVindas from '@/components/BoasVindas';
 import Acessibilidade from '@/components/Acessibilidade';
@@ -41,6 +42,7 @@ export default async function Perfil() {
     </nav>
     <div id="editar" />
     <PerfilForm perfil={perfil} />
+    <GaleriaFotos usuarioId={user.id} fotoAtual={perfil?.foto_url || null} />
     {extra && <BoasVindas perfil={{ id: user.id, ...extra }} editar />}
     <NotificacoesPush />
     <Acessibilidade />

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
 import { tocarNotificacao, destravarSom } from '@/lib/somNotificacao';
+import { limparNotificacoes } from '@/lib/notificacoes';
 
 const hora = (d) => new Date(d || Date.now()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 
@@ -17,6 +18,21 @@ export default function useChatAviso(path) {
   const [geralId, setGeralId] = useState(null);
   const avisar = useCallback((a) => { setAviso(a); tocarNotificacao(); }, []);
   useEffect(() => { const d = () => destravarSom(); window.addEventListener('pointerdown', d, { once: true }); return () => window.removeEventListener('pointerdown', d); }, []);
+  // Visualizou, sumiu: ao abrir/voltar ao app, as notificações do celular são removidas; o aviso na tela some sozinho
+  // (ou ao abrir a tela para onde ele leva).
+  useEffect(() => {
+    limparNotificacoes();
+    const v = () => { if (!document.hidden) limparNotificacoes(); };
+    document.addEventListener('visibilitychange', v);
+    return () => document.removeEventListener('visibilitychange', v);
+  }, []);
+  useEffect(() => { if (path) limparNotificacoes(path); }, [path]);
+  useEffect(() => {
+    if (!aviso) return;
+    if (aviso.href && aviso.href.split('?')[0] === path) { setAviso(null); return; }
+    const t = setTimeout(() => setAviso(null), 8000);
+    return () => clearTimeout(t);
+  }, [aviso, path]);
   const eu = useRef(null), salaRef = useRef(null), geralRef = useRef(null);
 
   const largo = typeof window !== 'undefined' && window.matchMedia('(min-width: 861px)').matches; // no computador /app/chat já abre a comunidade

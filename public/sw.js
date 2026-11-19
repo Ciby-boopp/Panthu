@@ -5,7 +5,11 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('push', (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'Panthu', body: event.data ? event.data.text() : '' }; }
-  event.waitUntil(self.registration.showNotification(d.title || 'Panthu', {
+  // Se o app já está aberto e visível, o aviso aparece dentro dele: não empilha notificação no celular.
+  event.waitUntil((async () => {
+    const abertas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (abertas.some((c) => c.visibilityState === 'visible' && c.url.startsWith(self.location.origin))) return;
+    await self.registration.showNotification(d.title || 'Panthu', {
     body: d.body || '',
     icon: '/icone-192.png',
     badge: '/icone-192.png',
@@ -14,7 +18,8 @@ self.addEventListener('push', (event) => {
     silent: false,
     vibrate: [120, 60, 120],
     data: { url: d.url || '/app/chat' },
-  }));
+  });
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
