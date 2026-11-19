@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
 import GritoTruco from './GritoTruco';
+import { EFEITOS, definirVoz, destravarAudio, gritar, lerPrefs, salvarPrefs, vozLigada } from '@/lib/efeitosTruco';
 import { criarCliente } from '@/lib/supabase/client';
 import { ligarPresenca } from '@/lib/presencaJogo';
 import { idCarta } from '@/lib/cartas';
@@ -120,7 +121,15 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
   const [grito, setGrito] = useState(null);
   const ant = useRef(null);
   const [mudo, setMudo] = useState(false);
-  useEffect(() => { try { setMudo(localStorage.getItem('panthu_grito_mudo') === '1'); } catch {} }, []);
+  const [zp, setZp] = useState({ efeito: 'normal', sons: true, anim: true });
+  useEffect(() => { setMudo(!vozLigada()); setZp(lerPrefs()); }, []);
+  // Celulares só liberam o som depois do primeiro toque: destrava no primeiro toque na mesa.
+  useEffect(() => {
+    const d = () => destravarAudio();
+    window.addEventListener('pointerdown', d, { once: true });
+    return () => window.removeEventListener('pointerdown', d);
+  }, []);
+  const mudarZ = (n) => { const novo = { ...zp, ...n }; setZp(novo); salvarPrefs(novo); };
   // Detecta o que acabou de acontecer na mesa e mostra a tela do grito (truco, quero ou correu).
   useEffect(() => {
     const a = ant.current; ant.current = s;
@@ -182,7 +191,18 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
       <div className="j-mao" aria-label="Suas cartas">
         {s.maos[seat].map((c, i) => <Carta key={idCarta(c)} c={c} largura="76px" onClick={() => agir({ t: 'jogar', i })} desabilitada={!minhaVez} />)}
       </div>
-      <label className="j-dica" style={{ display: 'block' }}><input type="checkbox" checked={!mudo} onChange={(e) => { setMudo(!e.target.checked); try { localStorage.setItem('panthu_grito_mudo', e.target.checked ? '0' : '1'); } catch {} }} />Grito em voz alta (som)</label>
+      <details className="j-zoeira">
+        <summary>🎭 Zoeira e sons</summary>
+        <label><input type="checkbox" checked={!mudo} onChange={(e) => { setMudo(!e.target.checked); definirVoz(e.target.checked); }} /> Grito em voz alta (som)</label>
+        <label>Efeito na voz
+          <select value={zp.efeito} onChange={(e) => mudarZ({ efeito: e.target.value })} disabled={mudo}>
+            {EFEITOS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}
+          </select>
+        </label>
+        <label><input type="checkbox" checked={zp.sons} onChange={(e) => mudarZ({ sons: e.target.checked })} disabled={mudo} /> Sons de pato e engraçados</label>
+        <label><input type="checkbox" checked={zp.anim} onChange={(e) => mudarZ({ anim: e.target.checked })} /> Animações engraçadas</label>
+        <button type="button" className="btn o mini" disabled={mudo} onClick={() => { destravarAudio(); gritar('TRUCO!', 'truco'); }}>▶ Testar o som</button>
+      </details>
       <p className="j-dica">Truco paulista: manilhas são a carta depois do vira (♣ zap &gt; ♥ &gt; ♠ &gt; ♦). Ganha a mão quem fizer 2 vazas. Vale 1 ponto, e sobe para 3, 6, 9 e 12. Se você não quiser aceitar, pode correr: quem pediu leva os pontos da rodada anterior. Mão de onze vale 3 e não tem truco. Primeiro a chegar em 12 vence.</p>
     </div>
   );

@@ -290,3 +290,20 @@ body{background:radial-gradient(1000px 500px at 50% -10%,#1f3a2a,transparent),va
 .adm-tile{display:grid;justify-items:center;gap:8px;padding:18px 8px;border-radius:16px;border:1px solid #44583A;background:linear-gradient(180deg,#203528,#1B2E22);color:var(--texto);text-decoration:none;font-weight:600}
 .adm-tile .ico{width:30px;height:30px;color:var(--ouro)}
 .aviso-geral{background:linear-gradient(180deg,#E3B872,#CC9B50);color:#101C15;font-weight:700;text-align:center;padding:10px 16px;font-size:14px}
+
+/* ---------- zoeira do truco ---------- */
+.zoeira{position:fixed;left:0;right:0;pointer-events:none;z-index:81;display:flex;justify-content:space-around;font-size:clamp(34px,10vw,54px)}
+.zoeira-truco,.zoeira-correu{top:9%}
+.zoeira-quero{top:4%}
+.zoeira-truco span{animation:zPato 1.6s ease-in-out both;animation-delay:calc(var(--i)*.18s)}
+.zoeira-quero span{animation:zChuva 1.7s ease-in both;animation-delay:calc(var(--i)*.15s)}
+.zoeira-correu span{animation:zCorre 1.5s linear both;animation-delay:calc(var(--i)*.2s)}
+@keyframes zPato{0%{transform:translate(-40vw,0) rotate(-10deg);opacity:0}15%{opacity:1}35%{transform:translate(-10vw,-14px) rotate(10deg)}55%{transform:translate(10vw,0) rotate(-10deg)}100%{transform:translate(45vw,-10px) rotate(8deg);opacity:0}}
+@keyframes zChuva{0%{transform:translateY(-10px) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(32vh) rotate(260deg) scale(1);opacity:0}}
+@keyframes zCorre{0%{transform:translateX(-45vw);opacity:0}15%{opacity:1}100%{transform:translateX(45vw);opacity:0}}
+.j-zoeira{margin:10px 0;padding:10px 14px;border:1px solid var(--borda);border-radius:var(--raio-s);background:var(--card)}
+.j-zoeira summary{cursor:pointer;font-weight:700}
+.j-zoeira label{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.j-zoeira select{flex:1;min-width:140px}
+.j-zoeira .btn{margin-top:10px}
+@media (prefers-reduced-motion:reduce){.zoeira{display:none}}

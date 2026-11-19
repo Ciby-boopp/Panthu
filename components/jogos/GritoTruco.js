@@ -1,23 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { gritar, lerPrefs, reduzMovimento } from '@/lib/efeitosTruco';
 
-// Falar em voz alta (se o aparelho permitir e a pessoa não tiver desligado o som).
-export function falar(texto) {
-  try {
-    if (localStorage.getItem('panthu_grito_mudo') === '1') return;
-    if (!('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance(texto.replace(/!/g, ''));
-    u.lang = 'pt-BR'; u.rate = 1.15; u.pitch = 1.5; u.volume = 1;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
-  } catch {}
-}
+const ZOEIRA = { truco: ['🦆', '🦆', '🦆'], quero: ['🎉', '🎊', '✨', '🎉'], correu: ['🐔', '💨'] };
+
+// Mantido por compatibilidade: agora o grito usa os efeitos de lib/efeitosTruco.js.
+export function falar(texto, tipo) { gritar(texto, tipo); }
 
 // Tela ilustrada do grito: soco na mesa, balão com o texto e ondas de som. Some sozinha em ~1,8 s.
 export default function GritoTruco({ grito }) {
   const [vis, setVis] = useState(null);
+  const [anim, setAnim] = useState(false);
   useEffect(() => {
     if (!grito) return;
-    setVis(grito); falar(grito.texto);
+    setAnim(lerPrefs().anim && !reduzMovimento());
+    setVis(grito); gritar(grito.texto, grito.tipo);
     const t = setTimeout(() => setVis(null), 1800);
     return () => clearTimeout(t);
   }, [grito?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -37,6 +34,7 @@ export default function GritoTruco({ grito }) {
       </svg>
       <div className="grito-texto">{vis.texto}</div>
       <div className="grito-quem">{vis.quem}</div>
+      {anim && <div className={`zoeira zoeira-${vis.tipo || 'truco'}`} aria-hidden="true">{(ZOEIRA[vis.tipo || 'truco'] || []).map((e, i) => <span key={i} style={{ '--i': i }}>{e}</span>)}</div>}
     </div>
   );
 }
