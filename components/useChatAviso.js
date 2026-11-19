@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
+import { tocarNotificacao, destravarSom } from '@/lib/somNotificacao';
 
 const hora = (d) => new Date(d || Date.now()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 
@@ -14,6 +15,8 @@ export default function useChatAviso(path) {
   const [pedidos, setPedidos] = useState(0);
   const [aviso, setAviso] = useState(null);
   const [geralId, setGeralId] = useState(null);
+  const avisar = useCallback((a) => { setAviso(a); tocarNotificacao(); }, []);
+  useEffect(() => { const d = () => destravarSom(); window.addEventListener('pointerdown', d, { once: true }); return () => window.removeEventListener('pointerdown', d); }, []);
   const eu = useRef(null), salaRef = useRef(null), geralRef = useRef(null);
 
   const largo = typeof window !== 'undefined' && window.matchMedia('(min-width: 861px)').matches; // no computador /app/chat já abre a comunidade
@@ -54,27 +57,27 @@ export default function useChatAviso(path) {
           if (!m || m.autor_id === eu.current) return;
           if (m.sala_id === salaRef.current) { getSb().rpc('marcar_lida', { sl: m.sala_id }); return; }
           setMapa((x) => ({ ...x, [m.sala_id]: (x[m.sala_id] || 0) + 1 }));
-          setAviso({ id: m.id || Date.now(), titulo: 'Nova mensagem', hora: hora(m.criado_em), texto: String(m.texto || '').slice(0, 90), href: `/app/chat/${m.sala_id}` });
+          avisar({ id: m.id || Date.now(), titulo: 'Nova mensagem', hora: hora(m.criado_em), texto: String(m.texto || '').slice(0, 90), href: `/app/chat/${m.sala_id}` });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversa_pedidos', filter: `para=eq.${user.id}` }, async () => {
           const lista = await carregar();
           const novo = lista?.[0];
-          setAviso({ id: Date.now(), titulo: 'Pedido para conversar', hora: hora(), texto: novo ? `${novo.nome} quer conversar com você` : 'Você recebeu um pedido', href: '/app/chat' });
+          avisar({ id: Date.now(), titulo: 'Pedido para conversar', hora: hora(), texto: novo ? `${novo.nome} quer conversar com você` : 'Você recebeu um pedido', href: '/app/chat' });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jogos_convites', filter: `para=eq.${user.id}` }, async (p) => {
           const c = p.new;
           const { data: v } = await getSb().rpc('ver_convite', { p_id: c.id });
           const nome = v?.[0]?.de_nome || 'Um amigo';
-          setAviso({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${({ memoria: 'Memória', xadrez: 'Xadrez', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' })[c.jogo] || 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
+          avisar({ id: c.id, titulo: 'Convite para jogar', hora: hora(), texto: `${nome} te chamou para jogar ${({ memoria: 'Memória', xadrez: 'Xadrez', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' })[c.jogo] || 'Truco'}`, href: `/app/jogos?convite=${c.id}` });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jogos_alta' }, (p) => {
           const j = p.new;
           if (!j || window.__panthuJogando === j.jogo) return;
           const nomes = { xadrez: 'Xadrez', truco: 'Truco', memoria: 'Memória', paciencia: 'Paciência', cacapalavras: 'Caça-palavras' };
-          setAviso({ id: j.id, titulo: `${nomes[j.jogo] || 'Um jogo'} está em alta!`, hora: hora(), texto: `Tem ${j.jogadores} pessoas jogando agora. Entre para jogar!`, href: `/app/jogos?jogo=${j.jogo}` });
+          avisar({ id: j.id, titulo: `${nomes[j.jogo] || 'Um jogo'} está em alta!`, hora: hora(), texto: `Tem ${j.jogadores} pessoas jogando agora. Entre para jogar!`, href: `/app/jogos?jogo=${j.jogo}` });
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pontos_cupons', filter: `usuario_id=eq.${user.id}` }, () => {
-          setAviso({ id: Date.now(), titulo: 'Você ganhou um brinde! 🎁', hora: hora(), texto: 'Seu cupom de brinde já está disponível.', href: '/app/pontos' });
+          avisar({ id: Date.now(), titulo: 'Você ganhou um brinde! 🎁', hora: hora(), texto: 'Seu cupom de brinde já está disponível.', href: '/app/pontos' });
         })
         .subscribe();
     })();

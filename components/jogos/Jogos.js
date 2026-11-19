@@ -12,6 +12,7 @@ import Placar from './Placar';
 import ChamarAmigo from './ChamarAmigo';
 import RankingGeral from './RankingGeral';
 import Avatar from '../Avatar';
+import Logo from '../Logo';
 import { salvarPartida } from '@/lib/placar';
 import { criarCliente } from '@/lib/supabase/client';
 
@@ -22,6 +23,7 @@ const JOGOS = [
   { id: 'paciencia', nome: 'Paciência', desc: 'Klondike. No duelo, mesmo baralho para os dois.', Comp: Paciencia },
   { id: 'cacapalavras', nome: 'Caça-palavras', desc: 'Ache as palavras antes do amigo.', Comp: CacaPalavras },
 ];
+const ICONE_JOGO = { truco: '🃏', xadrez: '♟️', memoria: '🧩', paciencia: '🂡', cacapalavras: '🔤' };
 const NOME = Object.fromEntries(JOGOS.map((j) => [j.id, j.nome]));
 
 export default function Jogos({ conviteId = null, jogoInicial = null }) {
@@ -147,9 +149,12 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
   return (
     <>
       {avisoSaida}
+      <div className="jogo-topo">
+        <Link href="/app" className="jt-logo" aria-label="Panthu, início"><Logo /></Link>
+        <h2><span aria-hidden="true">{ICONE_JOGO[jogo.id] || '🎮'}</span> {jogo.nome}{partida ? ` com ${partida.nome || 'amigo'}` : ''}</h2>
+        <button type="button" className="jt-casa" onClick={sair} aria-label="Voltar para a lista de jogos" title="Voltar para os jogos">⌂</button>
+      </div>
       <div className="linha" style={{ margin: '12px 0' }}>
-        <button className="btn o mini" onClick={sair}>← Jogos</button>
-        <h2 style={{ fontSize: 24 }}>{jogo.nome}{partida ? ` com ${partida.nome || 'amigo'}` : ''}</h2>
         {!partida && <span className="j-modos" role="group" aria-label="Modo de jogo">
           <button className={`btn mini ${modo === 'solo' ? 'p' : 'o'}`} aria-pressed={modo === 'solo'} onClick={() => trocarModo('solo')}>1 jogador</button>
           <button className={`btn mini ${modo === 'dois' ? 'p' : 'o'}`} aria-pressed={modo === 'dois'} onClick={() => trocarModo('dois')}>{rotuloDois}</button>

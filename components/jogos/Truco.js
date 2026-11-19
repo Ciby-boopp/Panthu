@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Carta from './Carta';
 import GritoTruco from './GritoTruco';
 import { EFEITOS, definirVoz, destravarAudio, gritar, lerPrefs, salvarPrefs, vozLigada } from '@/lib/efeitosTruco';
+import { lerGrito, tocarGrito } from '@/lib/gritoGravado';
+import Link from 'next/link';
 import { criarCliente } from '@/lib/supabase/client';
 import { ligarPresenca } from '@/lib/presencaJogo';
 import { idCarta } from '@/lib/cartas';
@@ -46,7 +48,13 @@ function TrucoOnline({ aoTerminar, auto }) {
   const canal = useRef(null);
   const sb = useRef(null);
   const pres = useRef(null);
+  const audioOp = useRef(null); // grito gravado do oponente (chega um instante antes da jogada)
   const enviado = useFimDeJogo(s, seat ?? 0, aoTerminar, { online: true });
+  // Envia meu grito gravado (se eu tiver) ao oponente. imediato = toque no patinho (toca na hora).
+  const enviarGrito = (imediato) => {
+    const url = lerGrito();
+    if (url && url.length < 150000) canal.current?.send({ type: 'broadcast', event: 'grito', payload: { audio: url, imediato: !!imediato } });
+  };
 
   useEffect(() => () => { if (pres.current) pres.current.sair(); else if (canal.current && sb.current) sb.current.removeChannel(canal.current); }, []);
 
@@ -62,6 +70,11 @@ function TrucoOnline({ aoTerminar, auto }) {
     canal.current = ch;
     pres.current = ligarPresenca(sb.current, ch);
     setCodigo(cod); setSeat(lugar);
+    ch.on('broadcast', { event: 'grito' }, ({ payload }) => {
+      const a = payload?.audio;
+      if (typeof a !== 'string' || !a.startsWith('data:audio/') || a.length > 200000) return;
+      if (payload.imediato) { if (vozLigada()) tocarGrito(a); } else audioOp.current = { url: a, t: Date.now() };
+    });
     if (lugar === 0) {
       ch.on('broadcast', { event: 'entrou' }, () => { if (!sRef.current) sRef.current = novoJogo(); publicar(); })
         .on('broadcast', { event: 'acao' }, ({ payload }) => aplicarNoAnfitriao({ ...payload, seat: 1 }));
@@ -113,10 +126,10 @@ function TrucoOnline({ aoTerminar, auto }) {
     );
   }
   const nomes = seat === 0 ? ['Você', 'Oponente'] : ['Oponente', 'Você'];
-  return <MesaTruco s={s} seat={seat} agir={agir} nomes={nomes} onNovo={null} />;
+  return <MesaTruco s={s} seat={seat} agir={agir} nomes={nomes} onNovo={null} audioOp={audioOp} enviarGrito={enviarGrito} />;
 }
 
-function MesaTruco({ s, seat, agir, nomes, onNovo }) {
+function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito }) {
   const op = 1 - seat;
   const [grito, setGrito] = useState(null);
   const ant = useRef(null);
@@ -134,11 +147,11 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
   useEffect(() => {
     const a = ant.current; ant.current = s;
     if (s.pedido && (!a || !a.pedido || a.pedido.para !== s.pedido.para || a.n !== s.n)) {
-      setGrito({ id: `${s.n}-${s.pedido.de}-${s.pedido.para}-${Date.now()}`, texto: NOME_AUMENTO[s.pedido.para].toUpperCase(), quem: s.pedido.de === seat ? 'Você gritou!' : `${nomes[s.pedido.de]} gritou!`, tipo: 'truco' });
+      setGrito({ id: `${s.n}-${s.pedido.de}-${s.pedido.para}-${Date.now()}`, texto: NOME_AUMENTO[s.pedido.para].toUpperCase(), quem: s.pedido.de === seat ? 'Você gritou!' : `${nomes[s.pedido.de]} gritou!`, tipo: 'truco', meu: s.pedido.de === seat });
     } else if (a && a.pedido && !s.pedido && s.fase === 'jogando' && s.valor > a.valor) {
-      setGrito({ id: `q-${Date.now()}`, texto: 'QUERO!', quem: a.pedido.de === seat ? `${nomes[1 - seat]} aceitou` : 'Você aceitou', tipo: 'quero' });
+      setGrito({ id: `q-${Date.now()}`, texto: 'QUERO!', quem: a.pedido.de === seat ? `${nomes[1 - seat]} aceitou` : 'Você aceitou', tipo: 'quero', meu: a.pedido.de !== seat });
     } else if (a && a.fase === 'jogando' && s.fase !== 'jogando' && s.motivo === 'correu') {
-      setGrito({ id: `c-${Date.now()}`, texto: 'CORREU!', quem: s.vencedorMao === seat ? `${nomes[1 - seat]} correu` : 'Você correu', tipo: 'correu' });
+      setGrito({ id: `c-${Date.now()}`, texto: 'CORREU!', quem: s.vencedorMao === seat ? `${nomes[1 - seat]} correu` : 'Você correu', tipo: 'correu', meu: s.vencedorMao !== seat });
     }
   }, [s]); // eslint-disable-line react-hooks/exhaustive-deps
   const jogando = s.fase === 'jogando';
@@ -157,7 +170,7 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
   const rotuloVaza = (k) => (s.res[k] === undefined ? '' : s.res[k] === 'e' ? 'Empate' : s.res[k] === seat ? 'Sua' : 'Dele');
   return (
     <div className="j-mesa">
-      <GritoTruco grito={grito} />
+      <GritoTruco grito={grito} audioOp={audioOp} />
       <div className="j-placar">
         <div><small>{nomes[op]}</small><b>{s.placar[op]}</b></div>
         <div className="j-valor">Mão {s.n} · vale <b>{s.valor}</b></div>
@@ -165,6 +178,9 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
       </div>
       <div className="j-mao" aria-label={`Cartas de ${nomes[op]}`}>{s.maos[op].map((_, i) => <Carta key={i} baixo largura="52px" />)}</div>
       <div className="j-centro">
+        <button type="button" className="pato-btn" aria-label="Gritar com a minha voz" title="Toque para gritar" onClick={() => { destravarAudio(); if (vozLigada()) { if (lerGrito()) tocarGrito(lerGrito()); else gritar('TRUCO!', 'truco'); } enviarGrito?.(true); }}>
+          <span aria-hidden="true">🦆</span><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8q4 4 0 8M10 5q7 7 0 14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+        </button>
         <div className="j-vira"><small>Vira</small><Carta c={s.vira} largura="56px" /><small>Manilha: {manilhaDe(s.vira)}</small></div>
         <div className="j-vazas">
           {s.mesa.map((vz, k) => (
@@ -182,9 +198,9 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
         {pedidoParaMim && <>
           <button className="btn p" onClick={() => agir({ t: 'aceitar' })}>Quero!</button>
           <button className="btn perigo" onClick={() => agir({ t: 'correr' })}>Correr 🏃</button>
-          {s.pedido.para < 12 && <button className="btn ouro grita" onClick={() => agir({ t: 'aumentar' })}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.pedido.para]].toUpperCase()}</button>}
+          {s.pedido.para < 12 && <button className="btn ouro grita" onClick={() => { enviarGrito?.(false); agir({ t: 'aumentar' }); }}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.pedido.para]].toUpperCase()}</button>}
         </>}
-        {podeTruco && <button className="btn ouro grita" onClick={() => agir({ t: 'truco' })}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.valor]].toUpperCase()}</button>}
+        {podeTruco && <button className="btn ouro grita" onClick={() => { enviarGrito?.(false); agir({ t: 'truco' }); }}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.valor]].toUpperCase()}</button>}
         {s.fase === 'fimMao' && <button className="btn p" onClick={() => agir({ t: 'proxima' })}>Próxima mão</button>}
         {s.fase === 'fimJogo' && onNovo && <button className="btn p" onClick={onNovo}>Jogar de novo</button>}
       </div>
@@ -202,6 +218,7 @@ function MesaTruco({ s, seat, agir, nomes, onNovo }) {
         <label><input type="checkbox" checked={zp.sons} onChange={(e) => mudarZ({ sons: e.target.checked })} disabled={mudo} /> Sons de pato e engraçados</label>
         <label><input type="checkbox" checked={zp.anim} onChange={(e) => mudarZ({ anim: e.target.checked })} /> Animações engraçadas</label>
         <button type="button" className="btn o mini" disabled={mudo} onClick={() => { destravarAudio(); gritar('TRUCO!', 'truco'); }}>▶ Testar o som</button>
+        <p className="j-dica">Quer gritar com a sua própria voz? <Link href="/app/configuracoes">Grave nas Configurações</Link>. Aqui no jogo é só tocar no patinho 🦆.</p>
       </details>
       <p className="j-dica">Truco paulista: manilhas são a carta depois do vira (♣ zap &gt; ♥ &gt; ♠ &gt; ♦). Ganha a mão quem fizer 2 vazas. Vale 1 ponto, e sobe para 3, 6, 9 e 12. Se você não quiser aceitar, pode correr: quem pediu leva os pontos da rodada anterior. Mão de onze vale 3 e não tem truco. Primeiro a chegar em 12 vence.</p>
     </div>

@@ -11,6 +11,8 @@ self.addEventListener('push', (event) => {
     badge: '/icone-192.png',
     tag: d.tag || 'panthu',
     renotify: true,
+    silent: false,
+    vibrate: [120, 60, 120],
     data: { url: d.url || '/app/chat' },
   }));
 });

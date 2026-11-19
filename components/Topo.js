@@ -9,7 +9,7 @@ import useChatAviso from './useChatAviso';
 import RegistrarAtividade from './RegistrarAtividade';
 
 const ATALHOS = [
-  ['/app/perfil', 'Meu perfil', 'perfil'], ['/app/proximo', 'Perto de você', 'local'], ['/app/amigos', 'Meus amigos', 'usuarios'],
+  ['/app/configuracoes', 'Configurações', 'adm'], ['/app/proximo', 'Perto de você', 'local'], ['/app/amigos', 'Meus amigos', 'usuarios'],
   ['/app/favoritos', 'Favoritos', 'check'], ['/app/pontos', 'Meus pontos', 'check'], ['/app/convidar', 'Convidar amigos', 'enviar'],
 ];
 
@@ -24,8 +24,8 @@ export default function Topo({ papel }) {
     { href: '/app/jogos', nome: 'Jogos', icone: 'jogos', ativo: path.startsWith('/app/jogos') },
     { href: '/app/chat', nome: 'Bate-papo', icone: 'usuarios', ativo: path.startsWith('/app/chat'), badge: true },
     { href: '/app/eventos', nome: 'Eventos', icone: 'eventos', ativo: path.startsWith('/app/eventos') || path.startsWith('/app/evento') },
+    { href: '/app/perfil', nome: 'Meu Perfil', icone: 'perfil', ativo: path.startsWith('/app/perfil') || path.startsWith('/app/pessoa') },
     { href: '/app/proximo', nome: 'Perto', icone: 'local', ativo: path.startsWith('/app/proximo') || path.startsWith('/app/amigos'), so: 'desk' },
-    { href: '/app/perfil', nome: 'Perfil', icone: 'perfil', ativo: path.startsWith('/app/perfil') || path.startsWith('/app/pessoa'), so: 'desk' },
     ...(['host', 'admin'].includes(papel) ? [{ href: '/host', nome: 'Host', icone: 'host', ativo: path.startsWith('/host'), so: 'desk' }] : []),
     ...(papel === 'admin' ? [{ href: '/admin', nome: 'ADM', icone: 'adm', ativo: path.startsWith('/admin'), so: 'desk' }] : []),
   ];
@@ -43,6 +43,7 @@ export default function Topo({ papel }) {
       <Link href="/app" className="marca" aria-label="Panthu, página inicial"><Logo /></Link>
       <nav className="nav" aria-label="Principal">{itens.map(aba)}</nav>
       <div className="acoes">
+        <button type="button" className="icone-btn mais-topo" aria-label="Mais atalhos" aria-expanded={menu} onClick={() => setMenu((m) => !m)}><span aria-hidden="true">{menu ? '×' : '☰'}</span></button>
         <Link href="/app/chat" className="icone-btn sino" aria-label={nao > 0 ? `Notificações: ${nao} novas` : 'Notificações'}><Icone nome="alerta" />{nao > 0 && <span className="selo">{nao > 9 ? '9+' : nao}</span>}</Link>
         <span className="nav-sair"><Sair /></span>
       </div>
@@ -57,9 +58,7 @@ export default function Topo({ papel }) {
       </div>
     )}
     <nav className="abas-baixo" aria-label="Navegação">
-      {baixo.slice(0, 2).map(aba)}
-      <button type="button" className="aba-mais" aria-label="Mais atalhos" aria-expanded={menu} onClick={() => setMenu((m) => !m)}><span aria-hidden="true">{menu ? '×' : '+'}</span></button>
-      {baixo.slice(2).map(aba)}
+      {baixo.map(aba)}
     </nav>
   </>);
 }
