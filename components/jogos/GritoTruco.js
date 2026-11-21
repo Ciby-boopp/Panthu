@@ -16,9 +16,9 @@ export default function GritoTruco({ grito, audioOp }) {
     if (!grito) return;
     setAnim(lerPrefs().anim && !reduzMovimento());
     setVis(grito);
-    // TRUCO com voz gravada: a minha (se eu gravei) ou a do oponente (se ele mandou). Sem gravação → voz com efeitos.
+    // Voz gravada só no primeiro TRUCO (3 pontos); 6, 9 e 12 mantêm a voz com efeitos. TRUCO com voz gravada: a minha (se eu gravei) ou a do oponente (se ele mandou). Sem gravação → voz com efeitos.
     let url = null;
-    if (grito.tipo === 'truco' && vozLigada()) {
+    if (grito.tipo === 'truco' && grito.primeiro && vozLigada()) {
       if (grito.meu) url = lerGrito();
       else if (audioOp?.current && Date.now() - audioOp.current.t < 8000) { url = audioOp.current.url; audioOp.current = null; }
     }

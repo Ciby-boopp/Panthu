@@ -1,4 +1,5 @@
 'use client';
+import MusicaBotao from './MusicaBotao';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Xadrez from './Xadrez';
@@ -160,6 +161,7 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
         <h2><span aria-hidden="true">{ICONE_JOGO[jogo.id] || '🎮'}</span> {jogo.nome}{partida ? ` com ${partida.nome || 'amigo'}` : ''}</h2>
         <button type="button" className="jt-casa" onClick={sair} aria-label="Voltar para a lista de jogos" title="Voltar para os jogos">⌂</button>
       </div>
+      <MusicaBotao jogo={jogo.id} />
       <div className="linha" style={{ margin: '12px 0' }}>
         {!partida && <span className="j-modos" role="group" aria-label="Modo de jogo">
           <button className={`btn mini ${modo === 'solo' ? 'p' : 'o'}`} aria-pressed={modo === 'solo'} onClick={() => trocarModo('solo')}>1 jogador</button>

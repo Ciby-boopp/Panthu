@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Avatar from '../Avatar';
 import AmigoBotao from '../AmigoBotao';
 import { criarCliente } from '@/lib/supabase/client';
+import MusicaBotao from '../jogos/MusicaBotao';
 
 const ETAPAS = [['lobby', 'Sala'], ['dicas', 'Dicas'], ['discussao', 'Discussão'], ['votacao', 'Votação'], ['resultado', 'Resultado']];
 const ordemEtapa = (s) => (s === 'ultima' ? 4 : s === 'fim' ? 5 : Math.max(0, ETAPAS.findIndex((x) => x[0] === s)));
@@ -99,6 +100,7 @@ export default function SalaImpostor({ codigo, euId, aoSair, aoNovaSala }) {
         <div><h1>{e.nome}</h1><small>{e.publica ? '🌎 Pública' : '🔒 Privada'} · Rodada {Math.max(e.rodada, 1)}</small></div>
         <button className="imp-cod" onClick={compartilhar} aria-label={`Código ${e.codigo}. Tocar para compartilhar`}><small>CÓDIGO</small><b>{e.codigo}</b></button>
       </header>
+      <MusicaBotao jogo="impostor" tensao={e.estado === 'votacao'} />
       <ol className="imp-etapas" aria-label="Etapas da partida">
         {ETAPAS.map(([k, t], i) => <li key={k} className={i < ordemEtapa(e.estado) ? 'feito' : i === ordemEtapa(e.estado) && e.estado !== 'fim' ? 'atual' : ''} aria-current={i === ordemEtapa(e.estado) && e.estado !== 'fim' ? 'step' : undefined}>{t}</li>)}
       </ol>
