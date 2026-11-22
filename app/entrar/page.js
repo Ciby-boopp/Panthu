@@ -19,6 +19,15 @@ function motivoCadastro(error) {
   return `${t} (detalhe: ${c || error.status || error.message})`;
 }
 
+// Explica o motivo real quando o Supabase recusa o envio (limite de e-mails, servidor de e-mail não configurado...).
+function motivoRecuperar(error) {
+  const t = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
+  if (error?.status === 429 || t.includes('rate') || t.includes('seconds')) return 'Muitos pedidos em pouco tempo. Aguarde alguns minutos e tente de novo.';
+  if (t.includes('not authorized')) return 'O envio de e-mails ainda não foi liberado para este endereço. Avise o suporte do Panthu.';
+  if (t.includes('smtp') || t.includes('sending') || error?.status >= 500) return 'O serviço de e-mail está com problema. Tente de novo em alguns minutos ou fale com o suporte.';
+  return 'Não foi possível enviar o e-mail agora. Confira o endereço e tente de novo.';
+}
+
 export default function Entrar() {
   const [modo, setModo] = useState('login');
   const [msg, setMsg] = useState(null);
@@ -77,7 +86,7 @@ export default function Entrar() {
       else setMsg({ t: 'ok', m: 'Conta criada! Enviamos um e-mail de confirmação: abra e toque no link para entrar. Veja também o spam.' });
     } else {
       const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/auth/callback?next=/redefinir` });
-      setMsg(error ? { t: 'erro', m: 'Não foi possível enviar o e-mail agora.' } : { t: 'ok', m: 'Se o e-mail existir, enviamos o link para criar uma nova senha.' });
+      setMsg(error ? { t: 'erro', m: motivoRecuperar(error) } : { t: 'ok', m: 'Se o e-mail existir, enviamos o link para criar uma nova senha.' });
     }
     setC(false);
   }

@@ -43,7 +43,7 @@ export default function useChatAviso(path) {
     const [n, p] = await Promise.all([getSb().rpc('nao_lidas'), getSb().rpc('meus_pedidos_recebidos')]);
     if (!n.error && n.data) {
       const m = {};
-      n.data.forEach((x) => { if (x.sala_id !== salaRef.current) m[x.sala_id] = Number(x.total); });
+      n.data.forEach((x) => { if (String(x.sala_id) !== String(salaRef.current)) m[x.sala_id] = Number(x.total); });
       setMapa(m);
     }
     if (!p.error && p.data) { setPedidos(p.data.length); return p.data; }
@@ -54,8 +54,8 @@ export default function useChatAviso(path) {
   useEffect(() => {
     if (!sala) return;
     setMapa((m) => (m[sala] ? { ...m, [sala]: 0 } : m));
-    getSb().rpc('marcar_lida', { sl: sala });
-  }, [sala, getSb]);
+    Promise.resolve(getSb().rpc('marcar_lida', { sl: sala })).then(() => carregar()).catch(() => {});
+  }, [sala, getSb, carregar]);
 
   useEffect(() => {
     let canal; let vivo = true;
@@ -71,7 +71,7 @@ export default function useChatAviso(path) {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (p) => {
           const m = p.new;
           if (!m || m.autor_id === eu.current) return;
-          if (m.sala_id === salaRef.current) { getSb().rpc('marcar_lida', { sl: m.sala_id }); return; }
+          if (String(m.sala_id) === String(salaRef.current)) { getSb().rpc('marcar_lida', { sl: m.sala_id }); return; }
           setMapa((x) => ({ ...x, [m.sala_id]: (x[m.sala_id] || 0) + 1 }));
           avisar({ id: m.id || Date.now(), titulo: 'Nova mensagem', hora: hora(m.criado_em), texto: String(m.texto || '').slice(0, 90), href: `/app/chat/${m.sala_id}` });
         })

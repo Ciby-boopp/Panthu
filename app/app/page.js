@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import Avatar from '@/components/Avatar';
 import Icone from '@/components/Icone';
+import PanthuMinhaCidade from '@/components/PanthuMinhaCidade';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Início' };
 
@@ -48,6 +49,8 @@ export default async function Inicio() {
         ))}
       </div>
     )}
+    <Link href="/app/buscar" className="ini-jogos"><span aria-hidden="true">🔎</span><span><b>Encontrar pessoas</b><small>Escolha a cidade, digite o nome e adicione como amigo.</small></span></Link>
+    <PanthuMinhaCidade />
     <Link href="/app/jogos" className="ini-jogos"><span aria-hidden="true">🏆</span><span><b>Desafie seus amigos!</b><small>Jogue, ganhe pontos e brindes na comunidade.</small></span></Link>
   </div>);
 }
