@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { EFEITOS, definirVoz, destravarAudio, gritar, lerPrefs, salvarPrefs, vozLigada } from '@/lib/efeitosTruco';
 import { MAX_MS, apagarGrito, gravacaoSuportada, gravar, salvarGrito, temGrito, tocarGrito, lerGrito } from '@/lib/gritoGravado';
+import AlterarSenha from './AlterarSenha';
 import { definirSomNotif, somNotifLigado, tocarNotificacao } from '@/lib/somNotificacao';
 
 // Configurações gerais de som: aviso de notificação e o grito de TRUCO (gravado ou com efeito).
@@ -65,6 +66,7 @@ export default function Configuracoes() {
           <button type="button" className="btn o mini" disabled={!voz} onClick={() => { destravarAudio(); gritar('TRUCO!', 'truco'); }}>▶ Testar a voz</button>
         </div>
       </section>
+      <AlterarSenha />
     </div>
   );
 }
