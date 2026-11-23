@@ -1,4 +1,5 @@
 'use client';
+import CriarGrupo from '../CriarGrupo';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { criarCliente } from '@/lib/supabase/client';
@@ -95,7 +96,8 @@ export default function ConversaLista({ ativo }) {
     <div className="conv-rol">
       {(aba === 'todas' || aba === 'grupos') && !q.trim() && temas.length > 0 && (
         <div className="temas" aria-label="Grupos para conversar">
-          <p className="conv-nota" style={{ margin: '4px 0' }}><b>Converse sobre o que você gosta</b></p>
+          <p className="conv-nota" style={{ margin: '4px 0' }}><b>Grupos para conversar</b></p>
+          <CriarGrupo />
           {temas.map((t) => (
             <Link key={t.id} href={`/app/chat/tema/${t.slug}`} className="conv-item">
               <span className="conv-ico" aria-hidden="true" style={{ fontSize: 22 }}>{t.emoji}</span>

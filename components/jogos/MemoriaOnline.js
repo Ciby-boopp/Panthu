@@ -14,6 +14,9 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
     setS(visao(sRef.current));
     canal.current?.send({ type: 'broadcast', event: 'estado', payload: visao(sRef.current) });
   };
+  // "Jogar novamente": novo tabuleiro na hora, sem voltar ao início.
+  const recomecar = () => { clearTimeout(timer.current); enviado.current = false; sRef.current = novaMemoria(8); publicar(); };
+  const revanche = () => { if (seat === 0) recomecar(); else canal.current?.send({ type: 'broadcast', event: 'revanche', payload: {} }); };
   const jogar = (lugar, i) => {
     const novo = virar(sRef.current, i, lugar);
     if (novo === sRef.current) return;
@@ -30,7 +33,8 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
     const pres = ligarPresenca(sb.current, ch);
     if (seat === 0) {
       ch.on('broadcast', { event: 'entrou' }, () => { if (!sRef.current) sRef.current = novaMemoria(8); publicar(); })
-        .on('broadcast', { event: 'acao' }, ({ payload }) => jogar(1, payload.i));
+        .on('broadcast', { event: 'acao' }, ({ payload }) => jogar(1, payload.i))
+        .on('broadcast', { event: 'revanche' }, () => recomecar());
     } else {
       ch.on('broadcast', { event: 'estado' }, ({ payload }) => setS(payload));
     }
@@ -46,6 +50,7 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
   }, [seat, s]);
 
   useEffect(() => {
+    if (s && s.fase !== 'fim') enviado.current = false;
     if (!s || s.fase !== 'fim' || enviado.current) return;
     enviado.current = true;
     const eu = s.pares[seat], ele = s.pares[1 - seat];
@@ -78,6 +83,7 @@ export default function MemoriaOnline({ sala, seat, aoTerminar }) {
         {s.cartas.map((c, i) => <CartaFigura key={c.id} f={c.f} baixo={!c.f} largura="100%" sel={c.achada} onClick={() => clicar(i)} desabilitada={c.achada || !minhaVez} />)}
       </div>
       {s.fase === 'fim' && <p role="status" className="j-final">{placar}</p>}
+      {s.fase === 'fim' && <div className="j-acoes"><button className="btn p" onClick={revanche}>🔄 Jogar novamente</button></div>}
       <p className="j-dica">Se o amigo fechar o app durante a partida, ela termina.</p>
     </div>
   );

@@ -159,7 +159,7 @@ export default function Jogos({ conviteId = null, jogoInicial = null }) {
       <div className="jogo-topo">
         <Link href="/app" className="jt-logo" aria-label="Panthu, início"><Logo /></Link>
         <h2><span aria-hidden="true">{ICONE_JOGO[jogo.id] || '🎮'}</span> {jogo.nome}{partida ? ` com ${partida.nome || 'amigo'}` : ''}</h2>
-        <button type="button" className="jt-casa" onClick={sair} aria-label="Voltar para a lista de jogos" title="Voltar para os jogos">⌂</button>
+        <button type="button" className="jt-casa" onClick={sair} aria-label="Voltar para a lista de jogos" title="Voltar para os jogos"><span aria-hidden="true">⌂</span><small>Voltar</small></button>
       </div>
       <MusicaBotao jogo={jogo.id} />
       <div className="linha" style={{ margin: '12px 0' }}>

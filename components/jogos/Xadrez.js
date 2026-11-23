@@ -7,7 +7,7 @@ export default function Xadrez({ modo, aoTerminar, auto }) {
   if (modo === 'solo' && !auto) return <XadrezSolo aoTerminar={aoTerminar} />;
   return (
     <SalaDuelo jogo="xadrez" titulo="Xadrez" auto={auto} novaCfg={() => ({ brancas: Math.random() < 0.5 ? 0 : 1 })}>
-      {({ cfg, seat, enviar, ouvir }) => <Partida key={cfg.brancas} online cor={cfg.brancas === seat ? 'w' : 'b'} enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar} />}
+      {({ cfg, seat, enviar, ouvir, revanche }) => <Partida key={cfg.brancas} online cor={cfg.brancas === seat ? 'w' : 'b'} enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar} revanche={revanche} />}
     </SalaDuelo>
   );
 }
@@ -25,7 +25,7 @@ function XadrezSolo({ aoTerminar }) {
   return <Partida key={nivel} nivel={nivel} cor="w" aoTerminar={aoTerminar} trocar={() => setNivel(null)} />;
 }
 
-function Partida({ online = false, cor, nivel = 2, enviar, ouvir, aoTerminar, trocar }) {
+function Partida({ online = false, cor, nivel = 2, enviar, ouvir, aoTerminar, trocar, revanche }) {
   const [s, setS] = useState(() => inicial());
   const [sel, setSel] = useState(null);
   const [promo, setPromo] = useState(null); // lances de promoção pendentes
@@ -115,7 +115,8 @@ function Partida({ online = false, cor, nivel = 2, enviar, ouvir, aoTerminar, tr
       )}
       <p className="j-status" role="status">{status}</p>
       {msg && <p className="j-dica">{msg}</p>}
-      {acabou && !online && <div className="j-acoes"><button className="btn p" onClick={novo}>Jogar de novo</button><button className="btn o" onClick={trocar}>Mudar o nível</button></div>}
+      {acabou && online && revanche && <div className="j-acoes"><button className="btn p" onClick={revanche}>🔄 Jogar novamente</button></div>}
+      {acabou && !online && <div className="j-acoes"><button className="btn p" onClick={novo}>🔄 Jogar novamente</button><button className="btn o" onClick={trocar}>Mudar o nível</button></div>}
       <p className="j-dica">Regras oficiais: roque, en passant, promoção, xeque, xeque-mate, afogamento, regra dos 50 lances e repetição tripla. Toque na peça e depois na casa de destino.</p>
     </div>
   );

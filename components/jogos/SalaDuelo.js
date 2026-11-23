@@ -1,6 +1,6 @@
 'use client';
 import { ligarPresenca } from '@/lib/presencaJogo';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { criarCliente } from '@/lib/supabase/client';
 
 const EVENTOS = ['entrou', 'inicio', 'jogada', 'prog', 'fim', 'desistir', 'revanche'];
@@ -32,12 +32,21 @@ export default function SalaDuelo({ jogo, titulo, auto, novaCfg, children }) {
   const [sala, setSala] = useState(auto?.sala || null);
   const [seat, setSeat] = useState(auto ? auto.seat : null);
   const [cfg, setCfg] = useState(null);
+  const [rodada, setRodada] = useState(0), rodadaRef = useRef(0);
   const canal = useRef(null), sb = useRef(null), cfgRef = useRef(null), ouvintes = useRef({});
   const enviar = useCallback((evento, payload = {}) => { canal.current?.send({ type: 'broadcast', event: evento, payload }); }, []);
   const ouvir = useCallback((evento, fn) => {
     (ouvintes.current[evento] ||= new Set()).add(fn);
     return () => ouvintes.current[evento]?.delete(fn);
   }, []);
+
+  // "Jogar novamente": o anfitrião sorteia uma nova configuração e os dois recomeçam na hora, sem voltar ao menu.
+  const novaPartida = useCallback(() => {
+    cfgRef.current = novaCfg(); rodadaRef.current += 1;
+    setCfg(cfgRef.current); setRodada(rodadaRef.current);
+    canal.current?.send({ type: 'broadcast', event: 'inicio', payload: { cfg: cfgRef.current, rodada: rodadaRef.current } });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const revanche = useCallback(() => { if (seat === 0) novaPartida(); else canal.current?.send({ type: 'broadcast', event: 'revanche', payload: {} }); }, [seat, novaPartida]);
 
   useEffect(() => {
     if (!sala || seat === null) return;
@@ -46,8 +55,9 @@ export default function SalaDuelo({ jogo, titulo, auto, novaCfg, children }) {
     canal.current = ch;
     const pres = ligarPresenca(sb.current, ch);
     EVENTOS.forEach((ev) => ch.on('broadcast', { event: ev }, ({ payload }) => {
-      if (ev === 'entrou' && seat === 0) { if (!cfgRef.current) cfgRef.current = novaCfg(); setCfg(cfgRef.current); ch.send({ type: 'broadcast', event: 'inicio', payload: { cfg: cfgRef.current } }); }
-      else if (ev === 'inicio' && seat === 1) { cfgRef.current = payload.cfg; setCfg(payload.cfg); }
+      if (ev === 'entrou' && seat === 0) { if (!cfgRef.current) cfgRef.current = novaCfg(); setCfg(cfgRef.current); ch.send({ type: 'broadcast', event: 'inicio', payload: { cfg: cfgRef.current, rodada: rodadaRef.current } }); }
+      else if (ev === 'inicio' && seat === 1) { cfgRef.current = payload.cfg; setCfg(payload.cfg); if ((payload.rodada || 0) !== rodadaRef.current) { rodadaRef.current = payload.rodada || 0; setRodada(rodadaRef.current); } }
+      else if (ev === 'revanche' && seat === 0) novaPartida();
       ouvintes.current[ev]?.forEach((fn) => fn(payload));
     }));
     ch.subscribe((st) => { if (st === 'SUBSCRIBED') pres.aoInscrever(); if (st === 'SUBSCRIBED' && seat === 1) ch.send({ type: 'broadcast', event: 'entrou', payload: {} }); });
@@ -68,5 +78,5 @@ export default function SalaDuelo({ jogo, titulo, auto, novaCfg, children }) {
       </div>
     );
   }
-  return children({ cfg, seat, enviar, ouvir, sala });
+  return <Fragment key={rodada}>{children({ cfg, seat, enviar, ouvir, sala, revanche })}</Fragment>;
 }

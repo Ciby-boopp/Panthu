@@ -8,8 +8,8 @@ export default function CacaPalavras({ modo, aoTerminar, auto }) {
   if (modo === 'solo' && !auto) return <Solo aoTerminar={aoTerminar} />;
   return (
     <SalaDuelo jogo="cacapalavras" titulo="Caça-palavras" auto={auto} novaCfg={() => ({ semente: Math.floor(Math.random() * 1e9) })}>
-      {({ cfg, enviar, ouvir }) => (
-        <DueloCorrida enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar}
+      {({ cfg, enviar, ouvir, revanche }) => (
+        <DueloCorrida enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar} revanche={revanche}
           comparar={(a, b) => (a.achadas !== b.achadas ? a.achadas - b.achadas : a.seg === b.seg ? 0 : b.seg - a.seg)}
           resumo={(r) => `${r.achadas} palavras em ${Math.floor(r.seg / 60)}:${String(r.seg % 60).padStart(2, '0')}`}
           renderJogo={({ aoFim, aoProgresso, ele, terminou }) => <Tabuleiro semente={cfg.semente} aoFim={aoFim} aoProgresso={aoProgresso} ele={ele} bloqueado={terminou} />} />
@@ -22,7 +22,7 @@ function Solo({ aoTerminar }) {
   const [semente, setSemente] = useState(() => Math.floor(Math.random() * 1e9));
   return (<>
     <Tabuleiro key={semente} semente={semente} aoFim={(r) => aoTerminar?.({ pontos: r.pontos, vitoria: r.achadas === r.total ? true : null, detalhes: { achadas: r.achadas, segundos: r.seg } })} />
-    <div className="j-acoes"><button className="btn p" onClick={() => setSemente(Math.floor(Math.random() * 1e9))}>Novo caça-palavras</button></div>
+    <div className="j-acoes"><button className="btn p" onClick={() => setSemente(Math.floor(Math.random() * 1e9))}>🔄 Jogar novamente</button></div>
   </>);
 }
 

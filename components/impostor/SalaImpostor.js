@@ -310,7 +310,7 @@ function Fim({ e, euId, J, nome, amigos, agir, sair, aoNovaSala, den, setDen, co
         </div>
       ))}
       <div className="imp-acoes" style={{ marginTop: 14 }}>
-        <button className="btn ouro grande" onClick={revanche}>{e.proxima_sala ? '🔁 Entrar na nova sala' : '🔁 Jogar de novo com o mesmo grupo'}</button>
+        <button className="btn ouro grande" onClick={revanche}>{e.proxima_sala ? '🔁 Entrar na nova sala' : '🔁 Jogar novamente com o mesmo grupo'}</button>
         <Link className="btn s" href="/app/chat">💬 Voltar à comunidade</Link>
         <button className="btn o" onClick={sair}>Menu do jogo</button>
       </div>

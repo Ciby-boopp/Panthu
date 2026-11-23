@@ -10,5 +10,5 @@ export default async function TemaPage({ params }) {
   const { data: lista } = await sb.rpc('grupos_lista');
   const g = (lista || []).find((x) => x.slug === slug);
   if (!g) notFound();
-  return <SalaTema grupo={{ id: g.id, nome: g.nome, descricao: g.descricao, emoji: g.emoji }} usuarioId={user.id} participaInicial={g.participo} membrosInicial={Number(g.membros)} />;
+  return <SalaTema grupo={{ id: g.id, nome: g.nome, descricao: g.descricao, emoji: g.emoji, podeExcluir: !!g.pode_excluir }} usuarioId={user.id} participaInicial={g.participo} membrosInicial={Number(g.membros)} />;
 }
