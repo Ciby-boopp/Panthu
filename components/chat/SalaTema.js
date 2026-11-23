@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { criarCliente } from '@/lib/supabase/client';
 import Avatar from '../Avatar';
 import Icone from '../Icone';
@@ -9,6 +10,7 @@ const hora = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit
 
 // Sala de um grupo temático: a pessoa entra para conversar sobre aquele assunto.
 export default function SalaTema({ grupo, usuarioId, participaInicial, membrosInicial }) {
+  const router = useRouter();
   const sb = useRef(null);
   const getSb = useCallback(() => (sb.current ||= criarCliente()), []);
   const [participa, setParticipa] = useState(participaInicial);
@@ -43,6 +45,12 @@ export default function SalaTema({ grupo, usuarioId, participaInicial, membrosIn
     if (error) { setAviso({ t: 'erro', m: 'Não foi possível entrar agora.' }); return; }
     setParticipa(true); setMembros((n) => n + 1);
   }
+  async function excluirGrupo() {
+    if (!window.confirm(`Excluir o grupo “${grupo.nome}” para todos? As mensagens serão apagadas.`)) return;
+    const { error } = await getSb().rpc('grupo_excluir', { p_grupo: grupo.id });
+    if (error) { setAviso({ t: 'erro', m: 'Não foi possível excluir agora.' }); return; }
+    router.push('/app/chat'); router.refresh();
+  }
   async function sair() {
     await getSb().rpc('grupo_sair', { p_grupo: grupo.id });
     setParticipa(false); setMembros((n) => Math.max(0, n - 1)); setMsgs([]);
@@ -66,7 +74,10 @@ export default function SalaTema({ grupo, usuarioId, participaInicial, membrosIn
       <Link href="/app/chat" className="sala-voltar" aria-label="Voltar para as conversas"><Icone nome="voltar" /></Link>
       <span className="sala-cab-ico" aria-hidden="true" style={{ fontSize: 22 }}>{grupo.emoji}</span>
       <div><h1>{grupo.nome}</h1><small>{membros} {membros === 1 ? 'pessoa' : 'pessoas'} no grupo</small></div>
-      {participa && <button type="button" className="btn o mini" style={{ marginLeft: 'auto' }} onClick={sair}>Sair do grupo</button>}
+      <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+        {participa && <button type="button" className="btn o mini" onClick={sair}>Sair do grupo</button>}
+        {grupo.podeExcluir && <button type="button" className="btn perigo mini" onClick={excluirGrupo}>Excluir</button>}
+      </span>
     </header>
     {!participa ? (
       <div className="card" style={{ margin: 16, textAlign: 'center' }}>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 // Duelo em que cada jogador joga o seu próprio tabuleiro (mesmo desafio) e, no fim, os resultados são comparados.
 // renderJogo({ aoFim, aoProgresso, ele }) desenha o jogo. comparar(eu, ele) devolve >0 (eu venci), <0 (ele venceu) ou 0.
 // resumo(r) devolve o texto do resultado de um jogador. pontos vem de r.pontos.
-export default function DueloCorrida({ enviar, ouvir, aoTerminar, renderJogo, comparar, resumo }) {
+export default function DueloCorrida({ enviar, ouvir, aoTerminar, renderJogo, comparar, resumo, revanche }) {
   const [eu, setEu] = useState(null);
   const [ele, setEle] = useState(null);
   const [prog, setProg] = useState(null);
@@ -37,6 +37,7 @@ export default function DueloCorrida({ enviar, ouvir, aoTerminar, renderJogo, co
       <div className="card" role="status" style={{ textAlign: 'center' }}>
         <h3>{cmp === 0 ? 'Empate!' : cmp > 0 ? '🏆 Você venceu!' : 'O amigo venceu desta vez.'}</h3>
         <p style={{ marginBottom: 0 }}>Você: <b>{resumo(eu)}</b> · Amigo: <b>{resumo(ele)}</b></p>
+        {revanche && <button type="button" className="btn p" style={{ marginTop: 12 }} onClick={revanche}>🔄 Jogar novamente</button>}
       </div>
     )}
   </>);

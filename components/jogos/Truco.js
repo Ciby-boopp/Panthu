@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { criarCliente } from '@/lib/supabase/client';
 import { ligarPresenca } from '@/lib/presencaJogo';
 import { idCarta } from '@/lib/cartas';
-import { NOME_AUMENTO, PROX, aplicar, decidirIA, manilhaDe, novoJogo, visao } from '@/lib/truco';
+import { NOME_AUMENTO, PROX, aplicar, decidirIA, manilhaDe, novoJogo, podeRedistribuir, visao } from '@/lib/truco';
 
 export default function Truco({ modo, aoTerminar, auto }) {
   return modo === 'solo' && !auto ? <TrucoSolo aoTerminar={aoTerminar} /> : <TrucoOnline aoTerminar={aoTerminar} auto={auto} />;
@@ -19,6 +19,7 @@ export default function Truco({ modo, aoTerminar, auto }) {
 function useFimDeJogo(s, seat, aoTerminar, extra = {}) {
   const enviado = useRef(false);
   useEffect(() => {
+    if (s && s.fase !== 'fimJogo') enviado.current = false;
     if (!s || s.fase !== 'fimJogo' || enviado.current) return;
     enviado.current = true;
     const venceu = s.vencedorMao === seat;
@@ -58,11 +59,18 @@ function TrucoOnline({ aoTerminar, auto }) {
   };
   // Patinho: só o barulho de pato (nunca a gravação). O oponente também ouve o "quá".
   const ultimoPato = useRef(0);
+  const [rizada, setRizada] = useState(0); // risada recebida do oponente (aparece na tela)
   const enviarPato = () => {
     const t = Date.now();
     if (t - ultimoPato.current < 1500) return;
     ultimoPato.current = t;
     canal.current?.send({ type: 'broadcast', event: 'pato', payload: {} });
+  };
+  const enviarRiso = () => {
+    const t = Date.now();
+    if (t - ultimoPato.current < 1500) return;
+    ultimoPato.current = t;
+    canal.current?.send({ type: 'broadcast', event: 'riso', payload: {} });
   };
 
   useEffect(() => () => { if (pres.current) pres.current.sair(); else if (canal.current && sb.current) sb.current.removeChannel(canal.current); }, []);
@@ -85,6 +93,7 @@ function TrucoOnline({ aoTerminar, auto }) {
       audioOp.current = { url: a, t: Date.now() };
     });
     ch.on('broadcast', { event: 'pato' }, () => { if (vozLigada()) somPato(2); });
+    ch.on('broadcast', { event: 'riso' }, () => setRizada(Date.now()));
     if (lugar === 0) {
       ch.on('broadcast', { event: 'entrou' }, () => { if (!sRef.current) sRef.current = novoJogo(); publicar(); })
         .on('broadcast', { event: 'acao' }, ({ payload }) => aplicarNoAnfitriao({ ...payload, seat: 1 }));
@@ -136,14 +145,17 @@ function TrucoOnline({ aoTerminar, auto }) {
     );
   }
   const nomes = seat === 0 ? ['Você', 'Oponente'] : ['Oponente', 'Você'];
-  return <MesaTruco s={s} seat={seat} agir={agir} nomes={nomes} onNovo={null} audioOp={audioOp} enviarGrito={enviarGrito} enviarPato={enviarPato} />;
+  return <MesaTruco s={s} seat={seat} agir={agir} nomes={nomes} audioOp={audioOp} enviarGrito={enviarGrito} enviarPato={enviarPato} enviarRiso={enviarRiso} rizada={rizada} onNovo={() => agir({ t: 'novo' })} />;
 }
 
-function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarPato }) {
+function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarPato, enviarRiso, rizada }) {
   const op = 1 - seat;
   const [grito, setGrito] = useState(null);
   const ant = useRef(null);
   const [mudo, setMudo] = useState(false);
+  const [riso, setRiso] = useState(0);
+  useEffect(() => { if (!rizada) return; setRiso(rizada); const t = setTimeout(() => setRiso(0), 3000); return () => clearTimeout(t); }, [rizada]);
+  const rir = () => { if (enviarRiso) enviarRiso(); else { setRiso(Date.now()); setTimeout(() => setRiso(0), 3000); } }; // contra o computador, aparece na própria tela
   const [zp, setZp] = useState({ efeito: 'normal', sons: true, anim: true });
   useEffect(() => { setMudo(!vozLigada()); setZp(lerPrefs()); }, []);
   // Celulares só liberam o som depois do primeiro toque: destrava no primeiro toque na mesa.
@@ -182,6 +194,7 @@ function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarP
   return (
     <div className="j-mesa">
       <GritoTruco grito={grito} audioOp={audioOp} />
+      {riso > 0 && <div className="riso-tela" key={riso} aria-hidden="true">{[8, 22, 36, 50, 64, 78, 90, 15, 70].map((x, i) => <span key={i} style={{ left: `${x}%`, animationDelay: `${(i % 5) * 0.18}s`, fontSize: `${44 + (i % 3) * 18}px` }}>😂</span>)}</div>}
       <div className="j-placar">
         <div><small>{nomes[op]}</small><b>{s.placar[op]}</b></div>
         <div className="j-valor">Mão {s.n} · vale <b>{s.valor}</b></div>
@@ -189,9 +202,12 @@ function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarP
       </div>
       <div className="j-mao" aria-label={`Cartas de ${nomes[op]}`}>{s.maos[op].map((_, i) => <Carta key={i} baixo largura="52px" />)}</div>
       <div className="j-centro">
-        <button type="button" className="pato-btn" aria-label="Fazer quá" title="Quá!" onClick={() => { destravarAudio(); if (vozLigada()) { somPato(2); enviarPato?.(); } }}>
-          <span aria-hidden="true">🦆</span><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8q4 4 0 8M10 5q7 7 0 14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-        </button>
+        <div className="j-reacoes">
+          <button type="button" className="pato-btn" aria-label="Fazer quá" title="Quá!" onClick={() => { destravarAudio(); if (vozLigada()) { somPato(2); enviarPato?.(); } }}>
+            <span aria-hidden="true">🦆</span><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8q4 4 0 8M10 5q7 7 0 14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+          </button>
+          <button type="button" className="pato-btn riso-btn" aria-label="Mandar risada" title="Rir 😂" onClick={rir}><span aria-hidden="true">😂</span></button>
+        </div>
         <div className="j-vira"><small>Vira</small><Carta c={s.vira} largura="56px" /><small>Manilha: {manilhaDe(s.vira)}</small></div>
         <div className="j-vazas">
           {s.mesa.map((vz, k) => (
@@ -213,7 +229,8 @@ function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarP
         </>}
         {podeTruco && <button className="btn ouro grita" onClick={() => { if (PROX[s.valor] === 3) enviarGrito?.(); agir({ t: 'truco' }); }}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.valor]].toUpperCase()}</button>}
         {s.fase === 'fimMao' && <button className="btn p" onClick={() => agir({ t: 'proxima' })}>Próxima mão</button>}
-        {s.fase === 'fimJogo' && onNovo && <button className="btn p" onClick={onNovo}>Jogar de novo</button>}
+        {s.fase === 'fimJogo' && onNovo && <button className="btn p" onClick={onNovo}>🔄 Jogar novamente</button>}
+        {podeRedistribuir(s, seat) && <button className="btn o" onClick={() => agir({ t: 'redistribuir' })}>🏃 Correr antes de começar (sem perder pontos)</button>}
       </div>
       <div className="j-mao" aria-label="Suas cartas">
         {s.maos[seat].map((c, i) => <Carta key={idCarta(c)} c={c} largura="76px" onClick={() => agir({ t: 'jogar', i })} desabilitada={!minhaVez} />)}

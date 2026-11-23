@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function ConvidarAmigos({ codigo, lista }) {
   const [copiado, setCopiado] = useState('');
   const link = typeof window !== 'undefined' ? `${location.origin}/entrar?ref=${codigo}` : `/entrar?ref=${codigo}`;
-  const texto = `Venha para o Panthu, uma comunidade de amizade e encontros. Entre pelo meu link: ${link} (ou use o código ${codigo})`;
+  const texto = `Venha para o Panthu, uma comunidade de amizades. Entre pelo meu link: ${link} (ou use o código ${codigo})`;
   async function copiar(t, k) { try { await navigator.clipboard.writeText(t); setCopiado(k); setTimeout(() => setCopiado(''), 2000); } catch { setCopiado('erro'); } }
   async function compartilhar() {
     if (navigator.share) { try { await navigator.share({ title: 'Panthu', text: texto, url: link }); return; } catch {} }

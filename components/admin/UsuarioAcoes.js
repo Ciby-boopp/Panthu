@@ -32,6 +32,17 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
     if (papel === 'host') await sb.from('host_permissoes').upsert({ host_id: perfil.id }, { onConflict: 'host_id', ignoreDuplicates: true });
     ok('Papel atualizado.');
   }
+  // Dar (ou tirar) o acesso de administrador. Só quem já é admin chega aqui; o banco também confere.
+  async function mudarAdmin(virar) {
+    const aviso = virar
+      ? `Dar acesso de ADMINISTRADOR para ${perfil.nome}? Essa pessoa poderá ver e alterar tudo no painel.`
+      : `Tirar o acesso de administrador de ${perfil.nome}? Ela volta a ser participante.`;
+    if (!window.confirm(aviso)) return;
+    setMsg(null);
+    const { error } = await sb.from('perfis').update({ papel: virar ? 'admin' : 'participante' }).eq('id', perfil.id);
+    if (error) return erro('Não foi possível alterar o acesso de administrador.');
+    ok(virar ? 'Agora essa pessoa é administradora.' : 'Acesso de administrador removido.');
+  }
   async function salvarRegiao() {
     setMsg(null);
     const { error } = await sb.from('perfis').update({ regiao: regiao.trim() || null }).eq('id', perfil.id);
@@ -64,7 +75,12 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
   }
   const alternar = (id) => setVinc(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  if (perfil.papel === 'admin') return <div className="card"><p>Esta conta é de administrador. Mudanças nela só pelo banco de dados.</p></div>;
+  if (perfil.papel === 'admin') return (<>
+    {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}
+    <div className="card"><h3>Administrador</h3><p>Esta conta é de administrador.</p>
+      {souEu ? <p style={{ color: 'var(--suave)' }}>Você não pode tirar o seu próprio acesso. Peça a outro administrador.</p>
+        : <button className="btn perigo mini" onClick={() => mudarAdmin(false)}>Tirar acesso de administrador</button>}
+    </div></>);
 
   return (<>
     {msg && <div className={`msg ${msg.t}`} role="status">{msg.m}</div>}
@@ -73,6 +89,11 @@ export default function UsuarioAcoes({ perfil, perm, eventos, vinculos, souEu })
       <div className="campo"><select value={papel} onChange={e => setPapel(e.target.value)} disabled={souEu} aria-label="Papel">
         <option value="participante">Participante</option><option value="host">Host</option></select></div>
       <button className="btn p mini" disabled={souEu || papel === perfil.papel} onClick={salvarPapel}>Salvar papel</button>
+    </div>
+    <div className="card">
+      <h3>Administrador</h3>
+      <p style={{ color: 'var(--suave)' }}>Dê a esta pessoa o mesmo acesso que o seu: ver e alterar tudo no painel.</p>
+      <button className="btn ouro mini" disabled={souEu} onClick={() => mudarAdmin(true)}>Tornar administrador</button>
     </div>
     <div className="card">
       <h3>Acesso</h3>

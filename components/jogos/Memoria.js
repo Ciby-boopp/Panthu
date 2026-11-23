@@ -93,7 +93,7 @@ function MemoriaJogo({ nivel, modo, aoTerminar, trocar }) {
         })}
       </div>
       {fim && <p role="status" className="j-final">{n === 1 ? `Parabéns! ${pontos} pontos em ${jogadas} jogadas e ${mm}.` : pares[0] === pares[1] ? `Empate: ${pares[0]} a ${pares[1]}.` : `${nome(pares[0] > pares[1] ? 0 : 1)} venceu: ${pares[0]} a ${pares[1]}.`}</p>}
-      <div className="j-acoes"><button className="btn p" onClick={reiniciar}>{fim ? 'Jogar de novo' : 'Recomeçar'}</button><button className="btn o" onClick={trocar}>Mudar dificuldade</button></div>
+      <div className="j-acoes"><button className="btn p" onClick={reiniciar}>{fim ? '🔄 Jogar novamente' : 'Recomeçar'}</button><button className="btn o" onClick={trocar}>Mudar dificuldade</button></div>
     </div>
   );
 }

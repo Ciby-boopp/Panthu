@@ -153,14 +153,14 @@ export default function Paciencia({ modo, aoTerminar, auto }) {
   if (modo === 'solo' && !auto) {
     return (<>
       <PacienciaJogo key={`s${rodada}`} semente={semente} rotulo="" aoFim={(pontos, vitoria, d) => aoTerminar?.({ pontos, vitoria, detalhes: d })} />
-      <div className="j-acoes"><button className="btn p" onClick={() => { setSemente(Math.floor(Math.random() * 1e9)); setRodada((r) => r + 1); }}>Novo jogo</button></div>
+      <div className="j-acoes"><button className="btn p" onClick={() => { setSemente(Math.floor(Math.random() * 1e9)); setRodada((r) => r + 1); }}>🔄 Jogar novamente</button></div>
     </>);
   }
   // 2 jogadores em celulares diferentes: o mesmo baralho para os dois; vence quem fizer mais pontos.
   return (
     <SalaDuelo jogo="paciencia" titulo="Paciência" auto={auto} novaCfg={() => ({ semente: Math.floor(Math.random() * 1e9) })}>
-      {({ cfg, enviar, ouvir }) => (
-        <DueloCorrida enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar}
+      {({ cfg, enviar, ouvir, revanche }) => (
+        <DueloCorrida enviar={enviar} ouvir={ouvir} aoTerminar={aoTerminar} revanche={revanche}
           comparar={(a, b) => a.pontos - b.pontos}
           resumo={(r) => `${r.pontos} pontos${r.venceu ? ' (completou!)' : ''}`}
           renderJogo={({ aoFim }) => <PacienciaJogo semente={cfg.semente} rotulo="Mesmo baralho do amigo" aoFim={(pontos, vitoria) => aoFim({ pontos, venceu: !!vitoria })} />} />
