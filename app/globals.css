@@ -363,3 +363,6 @@ body{background:radial-gradient(1000px 500px at 50% -10%,#1f3a2a,transparent),va
 .instalar-passos{margin:12px 0 4px;padding-left:22px;line-height:1.5;font-size:15px}
 .instalar-passos li{margin-bottom:6px}
 .instalar-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.musica-linha{align-items:center;gap:12px;flex-wrap:wrap}
+.musica-vol{display:flex;align-items:center;gap:6px;flex:1;min-width:150px;max-width:240px}
+.musica-vol input{flex:1;accent-color:var(--ouro,#D4A93A);min-width:0}
