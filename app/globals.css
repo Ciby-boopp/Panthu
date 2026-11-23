@@ -354,3 +354,12 @@ body{background:radial-gradient(1000px 500px at 50% -10%,#1f3a2a,transparent),va
 @media (prefers-reduced-motion:reduce){.riso-tela span{animation-duration:.1s}}
 .jt-casa{flex-direction:column;gap:0;width:auto;min-width:56px;height:auto;padding:4px 8px;border-radius:16px}
 .jt-casa span{font-size:26px;line-height:1}.jt-casa small{font-size:12px;font-weight:700;line-height:1.1}
+
+/* Convite para instalar o app */
+.instalar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:250;max-width:520px;margin:0 auto;padding:14px;border-radius:18px;background:var(--card);color:var(--texto,#fff);border:1.5px solid var(--ouro,#D4A93A);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.instalar-topo{display:flex;gap:12px;align-items:center}
+.instalar-topo small{display:block;color:var(--suave);font-size:13px}
+.instalar-ico{font-size:30px}
+.instalar-passos{margin:12px 0 4px;padding-left:22px;line-height:1.5;font-size:15px}
+.instalar-passos li{margin-bottom:6px}
+.instalar-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
