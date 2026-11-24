@@ -224,13 +224,13 @@ function MesaTruco({ s, seat, agir, nomes, onNovo, audioOp, enviarGrito, enviarP
       <div className="j-acoes">
         {pedidoParaMim && <>
           <button className="btn p" onClick={() => agir({ t: 'aceitar' })}>Quero!</button>
-          <button className="btn perigo" onClick={() => agir({ t: 'correr' })}>Correr 🏃</button>
+          <button className="btn perigo" onClick={() => agir({ t: 'correr' })}>Correr</button>
           {s.pedido.para < 12 && <button className="btn ouro grita" onClick={() => { agir({ t: 'aumentar' }); }}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.pedido.para]].toUpperCase()}</button>}
         </>}
         {podeTruco && <button className="btn ouro grita" onClick={() => { if (PROX[s.valor] === 3) enviarGrito?.(); agir({ t: 'truco' }); }}>🗣️ GRITAR {NOME_AUMENTO[PROX[s.valor]].toUpperCase()}</button>}
         {s.fase === 'fimMao' && <button className="btn p" onClick={() => agir({ t: 'proxima' })}>Próxima mão</button>}
         {s.fase === 'fimJogo' && onNovo && <button className="btn p" onClick={onNovo}>🔄 Jogar novamente</button>}
-        {podeRedistribuir(s, seat) && <button className="btn o" onClick={() => agir({ t: 'redistribuir' })}>🏃 Correr antes de começar (sem perder pontos)</button>}
+        {minhaVez && <button className="btn perigo" onClick={() => agir({ t: podeRedistribuir(s, seat) ? 'redistribuir' : 'correr' })}>Correr</button>}
       </div>
       <div className="j-mao" aria-label="Suas cartas">
         {s.maos[seat].map((c, i) => <Carta key={idCarta(c)} c={c} largura="76px" onClick={() => agir({ t: 'jogar', i })} desabilitada={!minhaVez} />)}
