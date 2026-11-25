@@ -34,3 +34,10 @@ main.adm-main{max-width:1280px}
 .tabela-rol{overflow-x:auto}
 .vazio-nota{color:var(--suave);margin:6px 0 0}
 .adm-conteudo .subabas.chips-nav{margin-top:6px}
+.adm-voltar{margin:0 0 12px}
+.mn-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.mn-pergunta{border-top:1px solid var(--borda);padding:4px 0}
+.mn-pergunta summary{cursor:pointer;font-weight:700;padding:10px 4px;list-style-position:inside}
+.mn-pergunta ol{margin:4px 0 10px;padding-left:26px;line-height:1.55}
+.mn-pergunta li{margin-bottom:6px}
+.mn-dica{background:rgba(212,169,58,.12);border-left:4px solid var(--ouro,#D4A93A);border-radius:8px;padding:8px 12px;margin:8px 0}

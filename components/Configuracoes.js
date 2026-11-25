@@ -41,7 +41,7 @@ export default function Configuracoes() {
 
       <section className="card" aria-labelledby="c-grito">
         <h2 id="c-grito" style={{ fontSize: 20 }}>🗣️ Meu grito de TRUCO</h2>
-        <p className="j-dica">Grave até {MAX_MS / 1000} segundos gritando “TRUCO!”. No jogo, basta tocar no patinho 🦆 (ou em “Gritar truco”) para sua voz soar. Sem gravação, o jogo usa a voz com efeitos escolhida abaixo.</p>
+        <p className="j-dica">Grave até {MAX_MS / 1000} segundos gritando “TRUCO!”. No jogo, sua voz grita só o primeiro TRUCO. Se você não gravar, o jogo usa a voz padrão do Panthu. Os pedidos de 6, 9 e 12 sempre usam a voz padrão, e o patinho 🦆 faz só “quá”.</p>
         {gravando
           ? <button type="button" className="btn perigo" onClick={() => parar.current?.()}>⏹ Parar (gravando…)</button>
           : <button type="button" className="btn ouro" onClick={iniciar}>🎙️ {tem ? 'Gravar de novo' : 'Gravar meu grito'}</button>}

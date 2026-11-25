@@ -1,9 +1,9 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const metadata = { title: 'Privacidade e LGPD' };
 export default function Privacidade() {
   return (
     <main className="estreito">
-      <p><Link href="/entrar">← Voltar</Link></p>
+      <p><BotaoVoltar href="/entrar">← Voltar</BotaoVoltar></p>
       <h1 style={{ fontSize: 32 }}>Privacidade e proteção de dados</h1>
       <p style={{ color: 'var(--suave)' }}>Explicamos de forma simples como o Panthu trata os seus dados, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018).</p>
       <div className="card"><h3>Quais dados usamos</h3>
