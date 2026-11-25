@@ -8,6 +8,7 @@ import Pessoas from '@/components/Pessoas';
 import Avatar from '@/components/Avatar';
 import AtualizarSozinho from '@/components/AtualizarSozinho';
 import AvaliarEvento from '@/components/AvaliarEvento';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Sao_Paulo' });
 const preco = (v) => (v == null ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
@@ -36,7 +37,7 @@ export default async function Evento({ params }) {
 
   return (<>
     {confirmado && <AtualizarSozinho segundos={45} />}
-    <p><Link href="/app/eventos">← Eventos</Link></p>
+    <p><BotaoVoltar href="/app/eventos">← Voltar</BotaoVoltar></p>
     <div className="card evento">
       <div className="banner">
         {e.banner_url && <img className="capa" loading="lazy" decoding="async" src={e.banner_url} alt="" />}

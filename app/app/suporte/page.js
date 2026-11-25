@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import SuporteForm from '@/components/SuporteForm';
 import { dataHora } from '@/lib/adm';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Suporte' };
 const ROT = { aberto: 'Aberto', em_andamento: 'Em andamento', resolvido: 'Resolvido' };
@@ -10,7 +10,7 @@ export default async function Page() {
   const { data: { user } } = await sb.auth.getUser();
   const { data: tickets, error } = await sb.from('suporte_tickets').select('id, assunto, status, resposta, criado_em').eq('usuario_id', user.id).order('criado_em', { ascending: false }).limit(10);
   return (<>
-    <p><Link href="/app/perfil">← Perfil</Link></p>
+    <p><BotaoVoltar href="/app/perfil">← Voltar</BotaoVoltar></p>
     <h1 style={{ fontSize: 30 }}>Fale com o suporte</h1>
     <p style={{ color: 'var(--suave)' }}>Dúvida, problema ou sugestão? Escreva aqui. Para denunciar uma mensagem, use o botão de denúncia no chat.</p>
     {error ? <p className="msg erro">Suporte indisponível no momento.</p> : <SuporteForm />}

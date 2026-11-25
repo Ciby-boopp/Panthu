@@ -1,9 +1,9 @@
-import Link from 'next/link';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const metadata = { title: 'Regras de convivência' };
 export default function Regras() {
   return (
     <main className="estreito">
-      <p><Link href="/entrar">← Voltar</Link></p>
+      <p><BotaoVoltar href="/entrar">← Voltar</BotaoVoltar></p>
       <h1 style={{ fontSize: 32 }}>Regras de convivência</h1>
       <p style={{ color: 'var(--suave)' }}>O Panthu existe para criar amizades e vida social com respeito. Estas regras valem para encontros, chat e jogos.</p>
       <div className="card"><h3>A nossa proposta</h3>

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
 import Avatar from '@/components/Avatar';
 import FavoritoBotao from '@/components/FavoritoBotao';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Favoritos' };
 const GRUPOS = [['evento', 'Eventos', (i) => `/app/evento/${i}`], ['grupo', 'Grupos', (i) => `/app/chat/${i}`], ['pessoa', 'Pessoas', (i) => `/app/pessoa/${i}`], ['estabelecimento', 'Estabelecimentos', null]];
@@ -10,7 +11,7 @@ export default async function Page() {
   const { data, error } = await sb.rpc('meus_favoritos');
   const lista = data || [];
   return (<>
-    <p><Link href="/app/perfil">← Perfil</Link></p>
+    <p><BotaoVoltar href="/app/perfil">← Voltar</BotaoVoltar></p>
     <h1 style={{ fontSize: 32 }}>Meus favoritos</h1>
     <p style={{ color: 'var(--suave)' }}>Toque na estrela de um evento, grupo, pessoa ou estabelecimento para guardar aqui.</p>
     {error && <p className="msg erro">Favoritos indisponíveis. Rode o arquivo supabase/pontos-favoritos-lgpd.sql no Supabase.</p>}

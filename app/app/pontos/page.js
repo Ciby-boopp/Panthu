@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { criarServidor } from '@/lib/supabase/server';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Meus pontos' };
 const fmt = (d) => new Date(d).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
@@ -18,7 +18,7 @@ export default async function Page() {
   const meta = r.proxima_meta ? Number(r.proxima_meta) : null;
   const pct = meta ? Math.min(100, Math.round((total / meta) * 100)) : 100;
   return (<>
-    <p><Link href="/app/perfil">← Perfil</Link></p>
+    <p><BotaoVoltar href="/app/perfil">← Voltar</BotaoVoltar></p>
     <h1 style={{ fontSize: 32 }}>Meus pontos</h1>
     {error && <p className="msg erro">Pontos indisponíveis. Rode o arquivo supabase/pontos-favoritos-lgpd.sql no Supabase.</p>}
     <div className="card">

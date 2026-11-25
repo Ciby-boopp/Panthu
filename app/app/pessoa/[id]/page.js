@@ -8,6 +8,7 @@ import FavoritoBotao from '@/components/FavoritoBotao';
 import { favoritosDe } from '@/lib/favoritos';
 import '@/components/chat.css';
 import { GaleriaVer } from '@/components/GaleriaFotos';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 export default async function Pessoa({ params }) {
   const { id } = await params;
@@ -21,7 +22,7 @@ export default async function Pessoa({ params }) {
   const favs = await favoritosDe(sb, user.id, 'pessoa');
   const { data: fotos } = await sb.rpc('fotos_pessoa', { p_id: p.id }); // vazio se o SQL da galeria ainda não foi rodado
   return (<>
-    <p><Link href="/app/chat">← Voltar</Link></p>
+    <p><BotaoVoltar href="/app/chat">← Voltar</BotaoVoltar></p>
     <div className="card" style={{ textAlign: 'center' }}>
       <div style={{ display: 'flex', justifyContent: 'center' }}><Avatar url={p.foto_url} nome={p.nome} tam={120} /></div>
       <h1 style={{ fontSize: 28, marginTop: 12 }}>{p.nome}</h1>

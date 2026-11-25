@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Topo from '@/components/Topo';
 import GestaoEvento from '@/components/GestaoEvento';
 import { criarServidor } from '@/lib/supabase/server';
 import { quando } from '@/lib/util';
+import BotaoVoltar from '@/components/BotaoVoltar';
 export const dynamic = 'force-dynamic';
 export default async function GerirEvento({ params }) {
   const { id } = await params;
@@ -26,7 +26,7 @@ export default async function GerirEvento({ params }) {
     await Promise.all((rodadas || []).map(async r => { atrib[r.id] = (await sb.rpc('mesas_da_rodada', { p_rodada: r.id })).data || []; }));
   }
   return (<><Topo papel={p.papel} /><main>
-    <p><Link href={p.papel === 'admin' ? `/admin/eventos/${id}` : '/host'}>← Voltar</Link></p>
+    <p><BotaoVoltar href={p.papel === 'admin' ? `/admin/eventos/${id}` : '/host'}>← Voltar</BotaoVoltar></p>
     <h1 style={{ fontSize: 28 }}>{ev.nome}</h1>
     <p style={{ color: 'var(--suave)' }}>{quando(ev.inicio)}</p>
     <GestaoEvento eventoId={id} perms={perms} lista={lista || []} mesas={mesas || []} rodadas={rodadas || []} atrib={atrib} />
