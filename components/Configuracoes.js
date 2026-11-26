@@ -9,7 +9,7 @@ import { definirSomNotif, somNotifLigado, tocarNotificacao } from '@/lib/somNoti
 export default function Configuracoes() {
   const [notif, setNotif] = useState(true);
   const [voz, setVoz] = useState(true);
-  const [zp, setZp] = useState({ efeito: 'normal', sons: true, anim: true });
+  const [zp, setZp] = useState({ efeito: 'normal', sons: true, anim: true, genero: 'auto' });
   const [tem, setTem] = useState(false);
   const [gravando, setGravando] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -58,6 +58,10 @@ export default function Configuracoes() {
         <h2 id="c-voz" style={{ fontSize: 20 }}>🎭 Voz padrão e zoeira (quando não há gravação)</h2>
         <div className="j-zoeira-lista" style={{ display: 'grid', gap: 10 }}>
           <label><input type="checkbox" checked={voz} onChange={(e) => { setVoz(e.target.checked); definirVoz(e.target.checked); }} /> Grito em voz alta</label>
+          <label>Voz do grito{' '}
+            <select value={zp.genero || 'auto'} onChange={(e) => mudarZ({ genero: e.target.value })} disabled={!voz}>
+              <option value="auto">Automática</option><option value="fem">Feminina</option><option value="masc">Masculina</option></select>
+          </label>
           <label>Efeito na voz{' '}
             <select value={zp.efeito} onChange={(e) => mudarZ({ efeito: e.target.value })} disabled={!voz}>{EFEITOS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}</select>
           </label>

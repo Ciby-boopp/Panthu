@@ -10,7 +10,7 @@ import RegistrarAtividade from './RegistrarAtividade';
 
 const ATALHOS = [
   ['/app/configuracoes', 'Configurações', 'adm'], ['/app/proximo', 'Perto de você', 'local'], ['/app/buscar', 'Encontrar pessoas', 'busca'], ['/app/amigos', 'Meus amigos', 'usuarios'],
-  ['/app/favoritos', 'Favoritos', 'check'], ['/app/pontos', 'Meus pontos', 'check'], ['/app/convidar', 'Convidar amigos', 'enviar'],
+  ['/app/favoritos', 'Favoritos', 'check'], ['/app/pontos', 'Meus pontos', 'check'], ['/app/convidar', 'Convidar amigos', 'enviar'], ['/app/manual', 'Manual de uso', 'busca'], ['/diretrizes', 'Diretrizes da comunidade', 'check'],
 ];
 
 export default function Topo({ papel }) {

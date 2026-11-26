@@ -6,12 +6,12 @@ import { MANUAL } from '@/lib/manualAdmin';
 const sem = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 // Manual do administrador: busca + categorias + perguntas que abrem com o passo a passo.
-export default function ManualAdmin() {
+export default function ManualAdmin({ manual = MANUAL }) {
   const [busca, setBusca] = useState('');
   const [sec, setSec] = useState('todas');
   const termos = sem(busca).split(/\s+/).filter(Boolean);
 
-  const secoes = useMemo(() => MANUAL
+  const secoes = useMemo(() => manual
     .filter((s) => sec === 'todas' || s.id === sec)
     .map((s) => ({ ...s, perguntas: s.perguntas.filter((p) => {
       if (!termos.length) return true;
@@ -27,7 +27,7 @@ export default function ManualAdmin() {
         <input id="mn-busca" type="search" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Ex.: faturamento, bloquear, evento, senha" autoComplete="off" /></div>
       <div className="mn-chips" role="group" aria-label="Assuntos">
         <button type="button" className={`btn mini ${sec === 'todas' ? 'p' : 'o'}`} onClick={() => setSec('todas')}>Todos</button>
-        {MANUAL.map((s) => <button key={s.id} type="button" className={`btn mini ${sec === s.id ? 'p' : 'o'}`} onClick={() => setSec(s.id)}>{s.icone} {s.titulo}</button>)}
+        {manual.map((s) => <button key={s.id} type="button" className={`btn mini ${sec === s.id ? 'p' : 'o'}`} onClick={() => setSec(s.id)}>{s.icone} {s.titulo}</button>)}
       </div>
     </div>
     <p style={{ color: 'var(--suave)' }} role="status">{total} {total === 1 ? 'pergunta' : 'perguntas'}</p>

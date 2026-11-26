@@ -5,6 +5,7 @@ export default function Regras() {
     <main className="estreito">
       <p><BotaoVoltar href="/entrar">← Voltar</BotaoVoltar></p>
       <h1 style={{ fontSize: 32 }}>Regras de convivência</h1>
+      <p><a href="/diretrizes">Ver as Diretrizes da comunidade completas →</a></p>
       <p style={{ color: 'var(--suave)' }}>O Panthu existe para criar amizades e vida social com respeito. Estas regras valem para encontros, chat e jogos.</p>
       <div className="card"><h3>A nossa proposta</h3>
         <p>O Panthu é um espaço de <b>amizade, socialização e respeito</b>. Não é um aplicativo de paquera, namoro ou relacionamento amoroso, e não aceitamos esse tipo de abordagem.</p></div>
