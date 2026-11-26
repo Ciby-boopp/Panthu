@@ -41,3 +41,4 @@ main.adm-main{max-width:1280px}
 .mn-pergunta ol{margin:4px 0 10px;padding-left:26px;line-height:1.55}
 .mn-pergunta li{margin-bottom:6px}
 .mn-dica{background:rgba(212,169,58,.12);border-left:4px solid var(--ouro,#D4A93A);border-radius:8px;padding:8px 12px;margin:8px 0}
+.hp-resp{margin:10px 0}.hp-resp dt{font-weight:700;margin-top:8px;font-size:14px;color:var(--suave)}.hp-resp dd{margin:2px 0 0}
