@@ -2,7 +2,7 @@
 -- Panthu — Diretrizes da comunidade (editáveis pelo administrador)
 -- Rode UMA vez no Supabase (SQL Editor). Pode rodar de novo: não apaga o que você já editou.
 -- =====================================================================
-create table if not exists public.diretrizes (
+create table if not exists public.diretrizes_comunidade (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,
   titulo text not null check (char_length(titulo) between 2 and 80),
@@ -13,16 +13,16 @@ create table if not exists public.diretrizes (
   atualizado_em timestamptz not null default now(),
   atualizado_por uuid references public.perfis(id) on delete set null
 );
-alter table public.diretrizes enable row level security;
+alter table public.diretrizes_comunidade enable row level security;
 
-drop policy if exists dir_ver on public.diretrizes;
-create policy dir_ver on public.diretrizes for select to anon, authenticated using (visivel or public.eh_admin());
-drop policy if exists dir_admin on public.diretrizes;
-create policy dir_admin on public.diretrizes for all to authenticated using (public.eh_admin()) with check (public.eh_admin());
-grant select on public.diretrizes to anon, authenticated;
-grant insert, update, delete on public.diretrizes to authenticated;
+drop policy if exists dircom_ver on public.diretrizes_comunidade;
+create policy dircom_ver on public.diretrizes_comunidade for select to anon, authenticated using (visivel or public.eh_admin());
+drop policy if exists dircom_admin on public.diretrizes_comunidade;
+create policy dircom_admin on public.diretrizes_comunidade for all to authenticated using (public.eh_admin()) with check (public.eh_admin());
+grant select on public.diretrizes_comunidade to anon, authenticated;
+grant insert, update, delete on public.diretrizes_comunidade to authenticated;
 
-create or replace function public.diretrizes_marcar()
+create or replace function public.diretrizes_com_marcar()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
   new.atualizado_em := now();
@@ -30,21 +30,21 @@ begin
   if tg_op = 'UPDATE' then new.padrao := old.padrao; new.slug := old.slug; end if;
   return new;
 end $$;
-drop trigger if exists diretrizes_marcar on public.diretrizes;
-create trigger diretrizes_marcar before insert or update on public.diretrizes for each row execute function public.diretrizes_marcar();
+drop trigger if exists diretrizes_com_marcar on public.diretrizes_comunidade;
+create trigger diretrizes_com_marcar before insert or update on public.diretrizes_comunidade for each row execute function public.diretrizes_com_marcar();
 
 -- Impede excluir as seções padrão.
-create or replace function public.diretrizes_protege()
+create or replace function public.diretrizes_com_protege()
 returns trigger language plpgsql as $$
 begin
   if old.padrao then raise exception 'As seções padrão não podem ser excluídas (você pode escondê-las).'; end if;
   return old;
 end $$;
-drop trigger if exists diretrizes_protege on public.diretrizes;
-create trigger diretrizes_protege before delete on public.diretrizes for each row execute function public.diretrizes_protege();
+drop trigger if exists diretrizes_com_protege on public.diretrizes_comunidade;
+create trigger diretrizes_com_protege before delete on public.diretrizes_comunidade for each row execute function public.diretrizes_com_protege();
 
 -- Seções pré-definidas, com um texto inicial. O administrador edita tudo depois.
-insert into public.diretrizes (slug, titulo, conteudo, ordem, padrao) values
+insert into public.diretrizes_comunidade (slug, titulo, conteudo, ordem, padrao) values
 ('proposta', 'Nossa proposta', E'O Panthu é um espaço de amizade, socialização e respeito.\nNão é um aplicativo de paquera, namoro ou relacionamento amoroso.', 1, true),
 ('convivencia', 'Respeito e convivência', E'- Trate todas as pessoas com educação, sem preconceito de qualquer tipo.\n- Respeite o espaço e o tempo de cada um: um “não” é um “não”.\n- Não faça convites românticos, elogios insistentes ou comentários sobre o corpo de ninguém.', 2, true),
 ('seguranca', 'Segurança e privacidade', E'- Não peça dados pessoais, dinheiro ou fotos.\n- Não compartilhe informações de outras pessoas.\n- Não divulgue telefone, endereço ou rotina de ninguém sem permissão.', 3, true),

@@ -15,7 +15,7 @@ export default function DiretrizesEditor({ inicial }) {
 
   async function salvar(s) {
     if (s.titulo.trim().length < 2) return aviso(s.id, 'erro', 'Escreva um título.');
-    const { error } = await get().from('diretrizes').update({ titulo: s.titulo.trim(), conteudo: s.conteudo, visivel: s.visivel }).eq('id', s.id);
+    const { error } = await get().from('diretrizes_comunidade').update({ titulo: s.titulo.trim(), conteudo: s.conteudo, visivel: s.visivel }).eq('id', s.id);
     if (error) return aviso(s.id, 'erro', 'Não foi possível salvar.');
     setLista((l) => l.map((x) => (x.id === s.id ? { ...x, sujo: false } : x)));
     aviso(s.id, 'ok', 'Salvo. Já está na página pública.'); router.refresh();
@@ -23,13 +23,13 @@ export default function DiretrizesEditor({ inicial }) {
   async function mover(i, d) {
     const j = i + d; if (j < 0 || j >= lista.length) return;
     const a = lista[i], b = lista[j];
-    const [r1, r2] = await Promise.all([get().from('diretrizes').update({ ordem: b.ordem }).eq('id', a.id), get().from('diretrizes').update({ ordem: a.ordem }).eq('id', b.id)]);
+    const [r1, r2] = await Promise.all([get().from('diretrizes_comunidade').update({ ordem: b.ordem }).eq('id', a.id), get().from('diretrizes_comunidade').update({ ordem: a.ordem }).eq('id', b.id)]);
     if (r1.error || r2.error) return aviso(a.id, 'erro', 'Não foi possível mudar a ordem.');
     const n = [...lista]; n[i] = { ...b, ordem: a.ordem }; n[j] = { ...a, ordem: b.ordem }; setLista(n.sort((x, y) => x.ordem - y.ordem)); router.refresh();
   }
   async function excluir(s) {
     if (!window.confirm(`Excluir a seção “${s.titulo}”?`)) return;
-    const { error } = await get().from('diretrizes').delete().eq('id', s.id);
+    const { error } = await get().from('diretrizes_comunidade').delete().eq('id', s.id);
     if (error) return aviso(s.id, 'erro', 'Não foi possível excluir.');
     setLista((l) => l.filter((x) => x.id !== s.id)); router.refresh();
   }
@@ -37,7 +37,7 @@ export default function DiretrizesEditor({ inicial }) {
     e.preventDefault();
     const t = novo.trim(); if (t.length < 2) return;
     const ordem = Math.max(0, ...lista.map((s) => s.ordem)) + 1;
-    const { data, error } = await get().from('diretrizes').insert({ slug: `extra-${Date.now().toString(36)}`, titulo: t, conteudo: '', ordem, visivel: false }).select('id, slug, titulo, conteudo, ordem, visivel, padrao, atualizado_em').single();
+    const { data, error } = await get().from('diretrizes_comunidade').insert({ slug: `extra-${Date.now().toString(36)}`, titulo: t, conteudo: '', ordem, visivel: false }).select('id, slug, titulo, conteudo, ordem, visivel, padrao, atualizado_em').single();
     if (error) return aviso('novo', 'erro', 'Não foi possível criar a seção.');
     setLista((l) => [...l, data]); setNovo(''); aviso('novo', 'ok', 'Seção criada (escondida). Escreva o texto e marque “Mostrar para todos”.'); router.refresh();
   }

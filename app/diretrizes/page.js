@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Diretrizes da comunidade' };
 export default async function Page() {
   const sb = await criarServidor();
-  const { data, error } = await sb.from('diretrizes').select('id, titulo, conteudo').eq('visivel', true).order('ordem');
+  const { data, error } = await sb.from('diretrizes_comunidade').select('id, titulo, conteudo').eq('visivel', true).order('ordem');
   const { data: { user } } = await sb.auth.getUser();
   return (
     <main className="estreito">
