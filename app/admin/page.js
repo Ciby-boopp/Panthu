@@ -17,6 +17,7 @@ function Cartao({ titulo, valor, icone, href, nota }) {
 export default async function Admin() {
   const sb = await criarServidor();
   const { data: r, error } = await sb.rpc('adm_resumo');
+  const { count: pedidosHost } = await sb.from('host_pedidos').select('*', { count: 'exact', head: true }).eq('status', 'pendente');
   if (error || !r) {
     return (<>
       <h1 style={{ fontSize: 32 }}>Painel ADM</h1>
@@ -62,6 +63,7 @@ export default async function Admin() {
       <Cartao titulo="Parceiros ativos" valor={num(r.parceiros)} icone="local" href="/admin/estabelecimentos" />
       <Cartao titulo="Cupons ativos" valor={num(r.cupons_ativos)} icone="check" />
       <Cartao titulo="Denúncias abertas" valor={num(r.denuncias_abertas)} icone="alerta" href="/admin/denuncias" />
+      <Cartao titulo="Pedidos para ser host" valor={num(pedidosHost)} icone="host" href="/admin/pedidos-host" />
     </div>
 
     <h2 className="adm-sec">Financeiro</h2>
